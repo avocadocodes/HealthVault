@@ -28,15 +28,21 @@ const Login = () => {
   };
 
   return (
-    <div className="login-container">
-      <h2>Login</h2>
-      <form onSubmit={handleLogin}>
+    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <form
+        onSubmit={handleLogin}
+        className="bg-white p-6 rounded-lg shadow-md w-full max-w-sm"
+      >
+        <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">
+          Login
+        </h2>
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          className="w-full p-3 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <input
           type="password"
@@ -44,9 +50,19 @@ const Login = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          className="w-full p-3 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-        <button type="submit">Login</button>
-        {error && <p className="error">{error}</p>}
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition"
+        >
+          Login
+        </button>
+        {error && (
+          <p className="mt-4 text-red-600 bg-red-100 p-2 rounded-md text-center">
+            {error}
+          </p>
+        )}
       </form>
     </div>
   );

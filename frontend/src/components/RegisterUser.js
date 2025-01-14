@@ -40,11 +40,26 @@ const RegisterUser = () => {
   };
 
   return (
-    <div className="register-user-container">
-      <h2>Register User</h2>
-      {message && <p className="success">{message}</p>}
-      {error && <p className="error">{error}</p>}
-      <form onSubmit={handleSubmit}>
+    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md"
+      >
+        <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">
+          Register User
+        </h2>
+
+        {message && (
+          <p className="text-green-700 bg-green-100 p-2 rounded-md text-center mb-4">
+            {message}
+          </p>
+        )}
+        {error && (
+          <p className="text-red-600 bg-red-100 p-2 rounded-md text-center mb-4">
+            {error}
+          </p>
+        )}
+
         <input
           type="text"
           name="name"
@@ -52,6 +67,7 @@ const RegisterUser = () => {
           value={formData.name}
           onChange={handleInputChange}
           required
+          className="w-full p-3 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <input
           type="email"
@@ -60,6 +76,7 @@ const RegisterUser = () => {
           value={formData.email}
           onChange={handleInputChange}
           required
+          className="w-full p-3 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <input
           type="password"
@@ -68,16 +85,23 @@ const RegisterUser = () => {
           value={formData.password}
           onChange={handleInputChange}
           required
+          className="w-full p-3 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <select
           name="role"
           value={formData.role}
           onChange={handleInputChange}
+          className="w-full p-3 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="doctor">Doctor</option>
           <option value="admin">Admin</option>
         </select>
-        <button type="submit">Register</button>
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition"
+        >
+          Register
+        </button>
       </form>
     </div>
   );

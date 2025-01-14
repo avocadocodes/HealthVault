@@ -23,7 +23,7 @@ const RegisterPatient = () => {
       setError("User not logged in. Please log in first.");
       return;
     }
-  
+
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/patients`,
@@ -37,18 +37,34 @@ const RegisterPatient = () => {
       );
       setMessage("Patient registered successfully!");
       setFormData({ name: "", age: "", gender: "" });
+      setError(""); // Clear any previous error
     } catch (err) {
       console.error(err.response?.data || err.message);
       setError(err.response?.data?.error || "Failed to register patient.");
     }
   };
-  
+
   return (
-    <div className="register-patient-container">
-      <h2>Register Patient</h2>
-      {message && <p className="success">{message}</p>}
-      {error && <p className="error">{error}</p>}
-      <form onSubmit={handleSubmit}>
+    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md"
+      >
+        <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">
+          Register Patient
+        </h2>
+
+        {message && (
+          <p className="text-green-700 bg-green-100 p-2 rounded-md text-center mb-4">
+            {message}
+          </p>
+        )}
+        {error && (
+          <p className="text-red-600 bg-red-100 p-2 rounded-md text-center mb-4">
+            {error}
+          </p>
+        )}
+
         <input
           type="text"
           name="name"
@@ -56,7 +72,9 @@ const RegisterPatient = () => {
           value={formData.name}
           onChange={handleInputChange}
           required
+          className="w-full p-3 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
+
         <input
           type="number"
           name="age"
@@ -64,19 +82,28 @@ const RegisterPatient = () => {
           value={formData.age}
           onChange={handleInputChange}
           required
+          className="w-full p-3 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
+
         <select
           name="gender"
           value={formData.gender}
           onChange={handleInputChange}
           required
+          className="w-full p-3 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">Select Gender</option>
           <option value="male">Male</option>
           <option value="female">Female</option>
           <option value="other">Other</option>
         </select>
-        <button type="submit">Register Patient</button>
+
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition"
+        >
+          Register Patient
+        </button>
       </form>
     </div>
   );
