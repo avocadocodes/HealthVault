@@ -4,20 +4,21 @@ const bcrypt = require("bcrypt");
 
 // User registration
 exports.register = async (req, res) => {
-  const { name, email, password, role, specialty} = req.body;
+  const { name, email, password, role, specialty } = req.body;
   try {
-    // Hash password before saving
+    // Check for doctor's specialty
     if (role === "doctor" && !specialty) {
       return res.status(400).json({ message: "Specialty is required for doctors" });
     }
+
+    // Hash password before saving
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = new User({ name, email, password: hashedPassword, role, specialty });
-
     await user.save();
 
     res.status(201).json({ message: "User registered successfully", user });
   } catch (error) {
-    console.error(error); 
+    console.error("Error during registration:", error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -26,24 +27,39 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   const { email, password } = req.body;
   try {
+    console.log("Login attempt for email:", email);
+
+    // Find user by email
     const user = await User.findOne({ email });
-    if (role !== "doctor" && role !== "patient") {
+    if (!user) {
+      console.error("User not found for email:", email);
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Validate role
+    if (user.role !== "doctor" && user.role !== "patient") {
+      console.error("Invalid role for user:", user.role);
       return res.status(400).json({ message: "Invalid role." });
     }
-    if (!user) return res.status(404).json({ message: "User not found" });
 
     // Validate password
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid)
+    if (!isPasswordValid) {
+      console.error("Invalid credentials for email:", email);
       return res.status(401).json({ message: "Invalid credentials" });
+    }
+
     console.log("JWT_SECRET used for signing:", process.env.JWT_SECRET);
+
     // Generate JWT Token
     const token = jwt.sign(
       { id: user._id, role: user.role },
-      process.env.JWT_SECRET, // This must match
+      process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
-    
+
+    console.log("Login successful, token generated for:", email);
+
     // Send token and user details
     res.status(200).json({
       token,
@@ -55,6 +71,7 @@ exports.login = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error("Error during login:", error);
     res.status(500).json({ error: error.message });
   }
 };

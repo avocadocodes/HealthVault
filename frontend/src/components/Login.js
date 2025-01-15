@@ -2,31 +2,24 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-const Login = () => {
+const Login = ({ onLogin }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/auth/login`,
         { email, password }
       );
-      const { token, role } = response.data;
+      const { token, user } = response.data;
 
-      // Save token and role to local storage
-      localStorage.setItem("token", token);
-      localStorage.setItem("role", role);
+      onLogin(token, user.role);
 
-      // Redirect based on user role
-      if (role === "doctor") {
-        navigate("/dashboard");
-      } else if (role === "patient") {
-        navigate("/patient-dashboard");
-      }
+      navigate(user.role === "doctor" ? "/dashboard" : "/patient-dashboard");
     } catch (err) {
       setError(err.response?.data?.message || "Login failed. Try again.");
     }
@@ -35,7 +28,7 @@ const Login = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <form
-        onSubmit={handleLogin}
+        onSubmit={handleSubmit}
         className="bg-white p-6 rounded-lg shadow-md w-full max-w-sm"
       >
         <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">
