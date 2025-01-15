@@ -15,16 +15,16 @@ const Login = () => {
         `${process.env.REACT_APP_API_URL}/auth/login`,
         { email, password }
       );
-      const { token, user } = response.data;
+      const { token, role } = response.data;
 
-      // Save token and role to localStorage
+      // Save token and role to local storage
       localStorage.setItem("token", token);
-      localStorage.setItem("role", user.role);
+      localStorage.setItem("role", role);
 
-      // Navigate based on role
-      if (user.role === "doctor") {
+      // Redirect based on user role
+      if (role === "doctor") {
         navigate("/dashboard");
-      } else if (user.role === "patient") {
+      } else if (role === "patient") {
         navigate("/patient-dashboard");
       }
     } catch (err) {

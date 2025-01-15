@@ -27,6 +27,12 @@ const Dashboard = () => {
   const [events, setEvents] = useState([]);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    navigate("/login");
+  };
+
 
   // Fetch patients, booking requests, and events on component mount
   useEffect(() => {
@@ -116,6 +122,12 @@ const Dashboard = () => {
           className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition"
         >
           Add Patient
+        </button>
+        <button
+          onClick={handleLogout}
+          className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600"
+        >
+          Logout
         </button>
       </div>
 

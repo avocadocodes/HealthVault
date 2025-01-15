@@ -1,6 +1,7 @@
 const BookingRequest = require("../models/BookingRequest");
 const Appointment = require("../models/Appointment");
 const mongoose = require("mongoose");
+const Notification = require("../models/Notification");
 
 // Fetch booking requests for a doctor
 exports.getBookingRequests = async (req, res) => {
@@ -80,6 +81,13 @@ exports.approveBookingRequest = async (req, res) => {
     });
 
     await appointment.save();
+    const notification = new Notification({
+      userId: request.patientId,
+      message: "Your booking request has been approved.",
+      isSeen: false,
+    });
+    await notification.save();
+
     res.status(200).json({ message: "Booking request approved.", appointment });
   } catch (err) {
     res.status(500).json({ error: "Failed to approve booking request." });
@@ -100,6 +108,14 @@ exports.rejectBookingRequest = async (req, res) => {
     if (!request) {
       return res.status(404).json({ error: "Booking request not found." });
     }
+    const notification = new Notification({
+      userId: request.patientId,
+      message: "Your booking request has been rejected. Try again later.",
+      isSeen: false,
+    });
+
+    await notification.save();
+
 
     res.status(200).json({ message: "Booking request rejected." });
   } catch (err) {

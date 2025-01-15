@@ -95,7 +95,6 @@ const RegisterUser = () => {
           className="w-full p-3 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="doctor">Doctor</option>
-          <option value="admin">Admin</option>
           <option value="patient">Patient</option>
         </select>
         {formData.role === "doctor" && (
