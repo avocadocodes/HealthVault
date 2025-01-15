@@ -92,7 +92,7 @@ const Dashboard = () => {
   const handleBookingAction = async (id, action) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.post(
+      await axios.put(
         `${process.env.REACT_APP_API_URL}/booking-requests/${id}/${action}`,
         {},
         {
@@ -206,16 +206,24 @@ const Dashboard = () => {
                     {request.patientName}
                   </p>
                   <p className="text-gray-500">
-                    <span className="font-semibold">Requested Date:</span>{" "}
+                    <span className="font-semibold">Health Issue:</span>{" "}
+                    {request.healthIssue}
+                  </p>
+                  <p className="text-gray-500">
+                    <span className="font-semibold">Date:</span>{" "}
                     {new Date(request.date).toLocaleDateString()}
+                  </p>
+                  <p className="text-gray-500">
+                    <span className="font-semibold">Time:</span>{" "}
+                    {request.time}
                   </p>
                 </div>
                 <div className="flex space-x-4">
                   <button
-                    onClick={() => handleBookingAction(request._id, "accept")}
+                    onClick={() => handleBookingAction(request._id, "approve")}
                     className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
                   >
-                    Accept
+                    Approve
                   </button>
                   <button
                     onClick={() => handleBookingAction(request._id, "reject")}

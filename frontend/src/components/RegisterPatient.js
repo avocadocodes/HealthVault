@@ -6,6 +6,9 @@ const RegisterPatient = () => {
     name: "",
     age: "",
     gender: "",
+    healthIssue: "",
+    medicines: "",
+    status: "",
   });
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -19,7 +22,6 @@ const RegisterPatient = () => {
     e.preventDefault();
     const token = localStorage.getItem("token");
     if (!token) {
-      console.error("No token found in localStorage");
       setError("User not logged in. Please log in first.");
       return;
     }
@@ -36,71 +38,103 @@ const RegisterPatient = () => {
         }
       );
       setMessage("Patient registered successfully!");
-      setFormData({ name: "", age: "", gender: "" });
-      setError(""); // Clear any previous error
+      setFormData({
+        name: "",
+        age: "",
+        gender: "",
+        healthIssue: "",
+        medicines: "",
+        status: "",
+      });
     } catch (err) {
-      console.error(err.response?.data || err.message);
-      setError(err.response?.data?.error || "Failed to register patient.");
+      setError(err.response?.data?.message || "Failed to register patient.");
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md"
-      >
-        <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">
-          Register Patient
-        </h2>
-
-        {message && (
-          <p className="text-green-700 bg-green-100 p-2 rounded-md text-center mb-4">
-            {message}
-          </p>
-        )}
-        {error && (
-          <p className="text-red-600 bg-red-100 p-2 rounded-md text-center mb-4">
-            {error}
-          </p>
-        )}
-
-        <input
-          type="text"
-          name="name"
-          placeholder="Patient Name"
-          value={formData.name}
-          onChange={handleInputChange}
-          required
-          className="w-full p-3 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-
-        <input
-          type="number"
-          name="age"
-          placeholder="Age"
-          value={formData.age}
-          onChange={handleInputChange}
-          required
-          className="w-full p-3 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-
-        <select
-          name="gender"
-          value={formData.gender}
-          onChange={handleInputChange}
-          required
-          className="w-full p-3 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">Select Gender</option>
-          <option value="male">Male</option>
-          <option value="female">Female</option>
-          <option value="other">Other</option>
-        </select>
-
+    <div className="p-6 bg-gray-50 min-h-screen">
+      <h2 className="text-3xl font-bold text-gray-800 mb-6">Register Patient</h2>
+      {message && <p className="bg-green-100 text-green-700 p-3 rounded-md">{message}</p>}
+      {error && <p className="bg-red-100 text-red-700 p-3 rounded-md">{error}</p>}
+      <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg p-6">
+        <div className="mb-4">
+          <label className="block text-gray-700 font-semibold mb-2">Name</label>
+          <input
+            type="text"
+            name="name"
+            placeholder="Patient Name"
+            value={formData.name}
+            onChange={handleInputChange}
+            required
+            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-gray-700 font-semibold mb-2">Age</label>
+          <input
+            type="number"
+            name="age"
+            placeholder="Age"
+            value={formData.age}
+            onChange={handleInputChange}
+            required
+            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-gray-700 font-semibold mb-2">Gender</label>
+          <select
+            name="gender"
+            value={formData.gender}
+            onChange={handleInputChange}
+            required
+            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Select Gender</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div className="mb-4">
+          <label className="block text-gray-700 font-semibold mb-2">Health Issue</label>
+          <input
+            type="text"
+            name="healthIssue"
+            placeholder="Health Issue"
+            value={formData.healthIssue}
+            onChange={handleInputChange}
+            required
+            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-gray-700 font-semibold mb-2">Medicines Diagnosed</label>
+          <textarea
+            name="medicines"
+            placeholder="Medicines (e.g., Medicine A, Medicine B)"
+            value={formData.medicines}
+            onChange={handleInputChange}
+            required
+            rows="3"
+            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+          ></textarea>
+        </div>
+        <div className="mb-4">
+          <label className="block text-gray-700 font-semibold mb-2">Status</label>
+          <textarea
+            name="status"
+            placeholder="Status (e.g., recovering, critical)"
+            value={formData.status}
+            onChange={handleInputChange}
+            required
+            rows="2"
+            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+          ></textarea>
+        </div>
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition"
+          className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition w-full"
         >
           Register Patient
         </button>

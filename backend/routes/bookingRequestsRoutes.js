@@ -1,25 +1,25 @@
 const express = require("express");
+const {
+  getBookingRequests,
+  approveBookingRequest,
+  rejectBookingRequest,
+  createBookingRequest,
+} = require("../controllers/bookingController");
+
+const authMiddleware = require("../middleware/authMiddleware");
+
 const router = express.Router();
 
-// Dummy booking requests data (replace with database queries if needed)
-const bookingRequests = [
-  { _id: "1", patientName: "John Doe", date: "2025-01-15T10:00:00Z" },
-  { _id: "2", patientName: "Jane Smith", date: "2025-01-16T14:00:00Z" },
-];
+// Fetch all booking requests for a doctor
+router.get("/", authMiddleware, getBookingRequests);
 
-// Get all booking requests
-router.get("/", (req, res) => {
-  res.status(200).json(bookingRequests);
-});
+// Create a new booking request (from patient)
+router.post("/", authMiddleware, createBookingRequest);
 
-// Accept a booking request
-router.post("/:id/accept", (req, res) => {
-  res.status(200).json({ message: `Booking request ${req.params.id} accepted` });
-});
+// Approve a booking request
+router.put("/:id/approve", authMiddleware, approveBookingRequest);
 
 // Reject a booking request
-router.post("/:id/reject", (req, res) => {
-  res.status(200).json({ message: `Booking request ${req.params.id} rejected` });
-});
+router.put("/:id/reject", authMiddleware, rejectBookingRequest);
 
 module.exports = router;

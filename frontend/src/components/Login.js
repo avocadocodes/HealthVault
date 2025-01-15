@@ -15,13 +15,18 @@ const Login = () => {
         `${process.env.REACT_APP_API_URL}/auth/login`,
         { email, password }
       );
-      const { token } = response.data;
+      const { token, user } = response.data;
 
-      // Save token to local storage
+      // Save token and role to localStorage
       localStorage.setItem("token", token);
+      localStorage.setItem("role", user.role);
 
-      // Navigate to dashboard
-      navigate("/dashboard");
+      // Navigate based on role
+      if (user.role === "doctor") {
+        navigate("/dashboard");
+      } else if (user.role === "patient") {
+        navigate("/patient-dashboard");
+      }
     } catch (err) {
       setError(err.response?.data?.message || "Login failed. Try again.");
     }

@@ -7,7 +7,8 @@ const RegisterUser = () => {
     name: "",
     email: "",
     password: "",
-    role: "doctor", // Default role
+    role: "doctor", 
+    specialty: "",
   });
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -95,7 +96,19 @@ const RegisterUser = () => {
         >
           <option value="doctor">Doctor</option>
           <option value="admin">Admin</option>
+          <option value="patient">Patient</option>
         </select>
+        {formData.role === "doctor" && (
+          <input
+            type="text"
+            name="specialty"
+            placeholder="Specialty"
+            value={formData.specialty}
+            onChange={handleInputChange}
+            required
+            className="w-full p-3 mb-4 border border-gray-300 rounded-md"
+          />
+        )}
         <button
           type="submit"
           className="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition"

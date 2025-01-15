@@ -8,6 +8,7 @@ const patientRoutes = require("./routes/patientRoutes");
 const healthDataRoutes = require("./routes/healthDataRoutes");
 const bookingRequestsRoutes = require("./routes/bookingRequestsRoutes");
 const calendarRoutes = require("./routes/calendarRoutes");
+const userRoutes = require("./routes/usersRoutes");
 
 dotenv.config();
 connectDB();
@@ -21,6 +22,7 @@ app.use("/api/patients", patientRoutes);
 app.use("/api/health-data", healthDataRoutes);
 app.use("/api/booking-requests", bookingRequestsRoutes);
 app.use("/api/calendar-events", calendarRoutes);
+app.use("/api/users", userRoutes);
 
 const PORT = process.env.PORT || 5000;
 
