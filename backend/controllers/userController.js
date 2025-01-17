@@ -1,14 +1,22 @@
-const User = require("../models/User");
-
-// Get all doctors
+const User = require("../models/User"); 
 exports.getDoctors = async (req, res) => {
   try {
-    // Fetch users with the role "doctor"
-    const doctors = await User.find({ role: "doctor" }).select(
-      "name email role specialty"
-    ); // Include specialty if applicable
+    const { name, specialty } = req.query;
+
+    
+    const query = {};
+    if (name) {
+      query.name = { $regex: name, $options: "i" }; 
+    }
+    if (specialty) {
+      query.specialty = { $regex: specialty, $options: "i" }; 
+    }
+
+   
+    const doctors = await User.find({ role: "doctor", ...query });
     res.status(200).json(doctors);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Error searching doctors:", error);
+    res.status(500).json({ message: "Failed to search doctors." });
   }
 };
