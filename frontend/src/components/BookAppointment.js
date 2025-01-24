@@ -5,7 +5,7 @@ import axios from "axios";
 
 
 const BookAppointment = () => {
-  const { doctorId } = useParams(); // Ensure doctorId is passed as ObjectId from route params
+  const { doctorId } = useParams(); 
   const [formData, setFormData] = useState({
     patientName: "",
     healthIssue: "",

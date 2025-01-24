@@ -2,7 +2,7 @@ const express = require("express");
 const {
   getBookingRequests,
   approveBookingRequest,
-  rejectBookingRequest,
+  deleteBookingRequest,
   createBookingRequest,
 } = require("../controllers/bookingController");
 
@@ -20,6 +20,7 @@ router.post("/", authMiddleware, createBookingRequest);
 router.put("/:id/approve", authMiddleware, approveBookingRequest);
 
 // Reject a booking request
-router.put("/:id/reject", authMiddleware, rejectBookingRequest);
+router.delete("/:id", authMiddleware, deleteBookingRequest);
+
 
 module.exports = router;

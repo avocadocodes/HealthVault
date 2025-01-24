@@ -1,5 +1,5 @@
 const express = require("express");
-const { getAppointments, bookAppointment } = require("../controllers/appointmentController");
+const { getAppointments, createAppointment } = require("../controllers/appointmentController");
 const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
@@ -8,6 +8,8 @@ const router = express.Router();
 router.get("/", authMiddleware, getAppointments);
 
 // Book a new appointment (for patients)
-router.post("/", authMiddleware, bookAppointment);
+// router.post("/",   authMiddleware , bookAppointment);
 
+// Define the POST route
+router.post("/", authMiddleware, createAppointment);
 module.exports = router;
