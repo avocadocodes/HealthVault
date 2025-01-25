@@ -1,8 +1,10 @@
 const express = require("express");
-const { getDoctors } = require("../controllers/userController");
+const { getDoctors, getUserDetails } = require("../controllers/userController");
+const authMiddleware = require('../middleware/authMiddleware');
+
 const router = express.Router();
 
-// Fetch all doctors
 router.get("/doctors", getDoctors);
+router.get("/me", authMiddleware, getUserDetails);
 
 module.exports = router;

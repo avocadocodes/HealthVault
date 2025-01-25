@@ -23,6 +23,7 @@ const localizer = dateFnsLocalizer({
 });
 
 const Dashboard = () => {
+  const [doctorName, setDoctorName] = useState("");
   const [patients, setPatients] = useState([]);
   const [bookingRequests, setBookingRequests] = useState([]);
   const [appointments, setAppointments] = useState([]);
@@ -86,8 +87,25 @@ const Dashboard = () => {
   
   // // Call this function after approving a booking request
   // await fetchAppointments();
-    
+  const fetchDoctorDetails = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/users/me`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setDoctorName(response.data.name); // Set the doctor's name
+    } catch (err) {
+      console.error("Failed to fetch doctor details:", err);
+      toast.error("Failed to fetch doctor details.");
+    }
+  };
 
+  useEffect(() => {
+    fetchDoctorDetails(); // Call the function here
+  }, []);
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
@@ -207,25 +225,27 @@ const Dashboard = () => {
       toast.error("Failed to update booking request.");
     }
   };
+  const handleDeleteAppointment = async (appointmentId) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(
+        `${process.env.REACT_APP_API_URL}/appointments/${appointmentId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setAppointments((prevAppointments) =>
+        prevAppointments.filter((appointment) => appointment._id !== appointmentId)
+      );
+      toast.success("Appointment deleted successfully!");
+    } catch (err) {
+      console.error("Failed to delete appointment:", err);
+      toast.error("Failed to delete appointment.");
+    }
+  };
   
-  // useEffect(() => {
-  //   const fetchAppointments = async () => {
-  //     try {
-  //       const token = localStorage.getItem("token");
-  //       const response = await axios.get(
-  //         `${process.env.REACT_APP_API_URL}/appointments`,
-  //         {
-  //           headers: { Authorization: `Bearer ${token}` },
-  //         }
-  //       );
-  //       setAppointments(response.data); // This should update the state
-  //     } catch (err) {
-  //       console.error("Failed to fetch appointments:", err);
-  //     }
-  //   };
+
   
-  //   fetchAppointments();
-  // }, []);
   
   useEffect(() => {
     const fetchBookingRequests = async () => {
@@ -250,7 +270,7 @@ const Dashboard = () => {
     <div className="bg-gray-900 text-white min-h-screen p-6">
       {/* Header Section */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-4xl font-bold">Welcome, Dr. Marcus 👋</h1>
+        <h1 className="text-4xl font-bold">Welcome {doctorName ? `Dr. ${doctorName}` : " "}👋</h1>
         <div className="flex space-x-4">
           <button
             onClick={() => navigate("/register-patient")}
@@ -446,6 +466,12 @@ const Dashboard = () => {
                   <p>Issue: {appointment.healthIssue}</p>
                   <p>Date: {new Date(appointment.date).toLocaleDateString()}</p>
                   <p>Time: {appointment.time}</p>
+                  <button
+                    className="bg-red-500 px-4 py-2 mt-2 rounded-md hover:bg-red-600"
+                    onClick={() => handleDeleteAppointment(appointment._id)}
+                  >
+                    Delete
+                  </button>
                 </div>
               ))}
             </div>

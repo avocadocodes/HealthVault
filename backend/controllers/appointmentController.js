@@ -36,7 +36,22 @@ const createAppointment = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+ const deleteAppointment = async (req, res) => {
+  try {
+    const appointmentId = req.params.id;
+    const deletedAppointment = await Appointment.findByIdAndDelete(appointmentId);
+
+    if (!deletedAppointment) {
+      return res.status(404).json({ error: "Appointment not found" });
+    }
+
+    res.status(200).json({ message: "Appointment deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting appointment:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
 
 
 
-module.exports = { createAppointment, getAppointments };
+module.exports = { createAppointment, getAppointments, deleteAppointment};

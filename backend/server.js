@@ -13,6 +13,7 @@ const notificationRoutes = require("./routes/notificationRoutes");
 const appointmentRoutes = require("./routes/appointmentRoutes");
 
 dotenv.config();
+
 connectDB();
 
 const app = express();
