@@ -21,7 +21,7 @@ const PatientDashboard = () => {
       try {
         const token = localStorage.getItem("token");
         const appointmentsResponse = await axios.get(
-          `${process.env.REACT_APP_API_URL}/appointments`,
+          `${process.env.REACT_APP_API_URL}/appointments/patient`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -153,8 +153,7 @@ const PatientDashboard = () => {
                 <span className="font-semibold">Time:</span> {appointment.time}
               </p>
               <p>
-                <span className="font-semibold">Doctor:</span>{" "}
-                {appointment.doctorName || "N/A"}
+              <p>Doctor: {appointment.doctorId?.name || "N/A"}</p>
               </p>
             </div>
           ))

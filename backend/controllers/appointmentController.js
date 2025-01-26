@@ -52,6 +52,18 @@ const createAppointment = async (req, res) => {
   }
 };
 
+const getPatientAppointments = async (req, res) => {
+  try {
+    const patientId = req.user._id; 
+    console.log("Fetching appointments for patient:", req.user._id);// Logged-in user's ID from middleware
+    const appointments = await Appointment.find({ patientId }).populate("doctorId", "name");
+    console.log("Fetched appointments:", appointments);
+    res.status(200).json(appointments);
+  } catch (err) {
+    console.error("Failed to fetch appointments:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
 
 
-module.exports = { createAppointment, getAppointments, deleteAppointment};
+module.exports = { createAppointment, getAppointments, deleteAppointment, getPatientAppointments};
