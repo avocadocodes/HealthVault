@@ -7,7 +7,7 @@ const AppointmentSchema = new mongoose.Schema({
   healthIssue: { type: String, required: true },
   date: { type: Date, required: true },
   time: { type: String, required: true },
-  
+  status: { type: String, default: "upcoming" },
 });
 
 module.exports = mongoose.model("Appointment", AppointmentSchema);

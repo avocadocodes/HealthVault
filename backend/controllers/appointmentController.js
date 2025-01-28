@@ -2,7 +2,7 @@ const Appointment = require("../models/Appointment");
 
 const getAppointments = async (req, res) => {
   try {
-    console.log("Request body:", req.body); // Log the incoming request
+    console.log("Request body:", req.body); 
     console.log("Decoded user:", req.user);
     const appointments = await Appointment.find({ doctorId: req.user.id });
     res.status(200).json(appointments);
@@ -14,8 +14,6 @@ const getAppointments = async (req, res) => {
 const createAppointment = async (req, res) => {
   try {
     const { patientName, healthIssue, date, time } = req.body;
-
-    // Validation
     if (!patientName || !healthIssue || !date || !time) {
       return res.status(400).json({ error: "All fields are required" });
     }
@@ -54,16 +52,40 @@ const createAppointment = async (req, res) => {
 
 const getPatientAppointments = async (req, res) => {
   try {
-    const patientId = req.user._id; 
-    console.log("Fetching appointments for patient:", req.user._id);// Logged-in user's ID from middleware
-    const appointments = await Appointment.find({ patientId }).populate("doctorId", "name");
-    console.log("Fetched appointments:", appointments);
-    res.status(200).json(appointments);
+    const patientId = req.user.id;
+    const upcomingAppointments = await Appointment.find({
+      patientId,
+      status: "upcoming",
+    }).populate("doctorId", "name");
+    const completedAppointments = await Appointment.find({
+      patientId,
+      status: "completed",
+    }).populate("doctorId", "name");
+
+    res.status(200).json({ upcomingAppointments, completedAppointments });
   } catch (err) {
-    console.error("Failed to fetch appointments:", err);
-    res.status(500).json({ error: "Server error" });
+    console.error("Error fetching patient appointments:", err);
+    res.status(500).json({ error: "Failed to fetch appointments" });
   }
 };
 
 
-module.exports = { createAppointment, getAppointments, deleteAppointment, getPatientAppointments};
+const markAppointmentAsVisited = async (req, res) => {
+  try {
+    const appointmentId = req.params.id;
+    const appointment = await Appointment.findById(appointmentId);
+    if (!appointment) {
+      return res.status(404).json({ error: "Appointment not found" });
+    }
+
+    appointment.status = "completed";
+    await appointment.save();
+
+    res.status(200).json({ message: "Appointment marked as visited", appointment });
+  } catch (err) {
+    console.error("Error marking appointment as visited:", err);
+    res.status(500).json({ error: "Failed to mark appointment as visited" });
+  }
+};
+
+module.exports = { createAppointment, getAppointments, deleteAppointment, getPatientAppointments, markAppointmentAsVisited};

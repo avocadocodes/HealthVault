@@ -9,7 +9,8 @@ import getDay from "date-fns/getDay";
 import axios from "axios";
 import { toast } from "react-toastify";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-
+import { useTheme } from "../context/ThemeContext";
+import { FaMoon, FaSun, FaSignOutAlt, FaUserInjured } from "react-icons/fa";
 const locales = {
   "en-US": require("date-fns/locale/en-US"),
 };
@@ -38,6 +39,10 @@ const Dashboard = () => {
     date: "",
     time: "",
   });
+  const { theme, toggleTheme } = useTheme();
+  useEffect(() => {
+    document.body.className = theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black";
+  }, [theme]);
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -67,26 +72,6 @@ const Dashboard = () => {
     }
   };
 
-  
-  // Call this function after approving a booking request
-  // await fetchAppointments();
-  // const fetchAppointments = async () => {
-  //   try {
-  //     const token = localStorage.getItem("token");
-  //     const response = await axios.get(
-  //       `${process.env.REACT_APP_API_URL}/appointments`,
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       }
-  //     );
-  //     setAppointments(response.data); // Update state with backend data
-  //   } catch (err) {
-  //     console.error("Failed to fetch appointments:", err);
-  //   }
-  // };
-  
-  // // Call this function after approving a booking request
-  // await fetchAppointments();
   const fetchDoctorDetails = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -243,10 +228,28 @@ const Dashboard = () => {
       toast.error("Failed to delete appointment.");
     }
   };
+  const markAsVisited = async (appointmentId) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.put(
+        `${process.env.REACT_APP_API_URL}/appointments/${appointmentId}/visited`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+  
+      setAppointments((prevAppointments) =>
+        prevAppointments.filter((appointment) => appointment._id !== appointmentId)
+      );
+  
+      toast.success("Appointment marked as visited");
+      // No need for an additional fetchAppointments here since the state is already updated.
+    } catch (err) {
+      console.error("Failed to mark appointment as visited:", err);
+      toast.error("Failed to mark appointment as visited");
+    }
+  };
   
 
-  
-  
   useEffect(() => {
     const fetchBookingRequests = async () => {
       try {
@@ -267,22 +270,37 @@ const Dashboard = () => {
   }, []);
   
   return (
-    <div className="bg-gray-900 text-white min-h-screen p-6">
+    <div className={`min-h-screen ${theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black"}`}>
       {/* Header Section */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-4xl font-bold">Welcome {doctorName ? `Dr. ${doctorName}` : " "}👋</h1>
         <div className="flex space-x-4">
+          <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-gray-700">
+            {theme === "light" ? (
+              <FaMoon className="text-black dark:text-white" />
+            ) : (
+              <FaSun className="text-white dark:text-white" />
+            )}
+          </button>
           <button
             onClick={() => navigate("/register-patient")}
-            className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600"
+            className="p-2 rounded-full hover:bg-gray-700"
           >
-            Add Patient
+            {theme === "light" ? (
+              <FaUserInjured className="text-black dark:text-white" />
+            ) : (
+              <FaUserInjured className="text-white dark:text-white" />
+            )}
           </button>
           <button
             onClick={handleLogout}
-            className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600"
+            className="p-2 rounded-full hover:bg-gray-700"
           >
-            Logout
+            {theme === "light" ? (
+              <FaSignOutAlt className="text-black dark:text-white" />
+            ) : (
+              <FaSignOutAlt className="text-white dark:text-white" />
+            )}
           </button>
         </div>
       </div>
@@ -467,6 +485,12 @@ const Dashboard = () => {
                   <p>Date: {new Date(appointment.date).toLocaleDateString()}</p>
                   <p>Time: {appointment.time}</p>
                   <button
+                    className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
+                    onClick={() => markAsVisited(appointment._id)}
+                  >
+                    Mark as Visited
+                  </button>
+                  <button
                     className="bg-red-500 px-4 py-2 mt-2 rounded-md hover:bg-red-600"
                     onClick={() => handleDeleteAppointment(appointment._id)}
                   >
@@ -514,63 +538,6 @@ const Dashboard = () => {
                     {/* Approve Button */}
                     <button
                       onClick={() => handleBookingAction(request._id, "approve")}
-                      // onClick={async () => {
-                      //   try {
-                      //     const token = localStorage.getItem("token");
-                      //     console.log("Approving booking request with ID:", request._id);
-                      //     if (!request._id) {
-                      //       throw new Error("Invalid booking request ID");
-                      //     }
-                      //     const response = await axios.put(
-                      //       `${process.env.REACT_APP_API_URL}/booking-requests/${request._id}/approve`,
-                      //       {},
-                      //       {
-                      //         headers: { Authorization: `Bearer ${token}` },
-                      //       }
-                      //     );
-                      //     if (!response.data || !response.data.appointment) {
-                      //       throw new Error("Failed to receive appointment data from backend");
-                      //     }
-                      //     const newAppointment = response.data.appointment; // Get the approved appointment from response
-                          
-                          // Add the new appointment to the backend to ensure persistence
-                          // await axios.post(
-                          //   `${process.env.REACT_APP_API_URL}/appointments`,
-                          //   {
-                          //     patientName: newAppointment.patientName,
-                          //     healthIssue: newAppointment.healthIssue,
-                          //     date: newAppointment.date,
-                          //     time: newAppointment.time,
-                          //     doctorId: newAppointment.doctorId, // Ensure required fields are added
-                          //     patientId: newAppointment.patientId, // Include patient reference
-                          //   },
-                          //   {
-                          //     headers: { Authorization: `Bearer ${token}` },
-                          //   }
-                          // );
-
-                          // const appointmentsResponse = await axios.get(
-                          //   `${process.env.REACT_APP_API_URL}/appointments`,
-                          //   {
-                          //     headers: { Authorization: `Bearer ${token}` },
-                          //   }
-                          // );
-                          // setAppointments((prevAppointments) => [...prevAppointments, newAppointment]);
-                        //   if (!newAppointment) {
-                        //     throw new Error("Failed to receive appointment data from backend");
-                        //   }
-                      
-                        //   await fetchAppointments();
-                        //   setBookingRequests((prevRequests) =>
-                        //     prevRequests.filter((req) => req._id !== request._id)
-                        //   );
-                          
-                        //   toast.success("Booking request approved and appointment created!");
-                        // } catch (err) {
-                        //   console.error("Error approving booking request:", err);
-                        //   toast.error("Failed to approve booking request.");
-                        // }
-                      // }}
                       className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
                     >
                       Approve
