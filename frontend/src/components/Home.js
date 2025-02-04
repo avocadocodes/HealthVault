@@ -10,7 +10,7 @@ import HeroImageBlack from "../images/heroblack.png";
 import HeroImageWhite from "../images/herowhite.png";
 import ContactImage from "../images/contact.jpg";
 import { useTheme } from "../context/ThemeContext";
-import { FaMoon, FaSun, FaSignOutAlt,FaUserPlus, FaTachometerAlt, FaSignInAlt } from "react-icons/fa";
+import { FaMoon, FaSun, FaSignOutAlt,FaUserPlus, FaTachometerAlt, FaSignInAlt, FaBookOpen } from "react-icons/fa";
 
 // Custom Arrow Component
 const CustomArrow = ({ direction, onClick }) => {
@@ -65,6 +65,11 @@ const Home = () => {
       toast.error("Role not recognized");
     }
   };
+  const blogs = [
+    { title: "Healthy Living Tips", description: "Discover ways to maintain a healthy lifestyle.", url: "https://www.healthline.com/health/how-to-maintain-a-healthy-lifestyle" },
+    { title: "Nutrition & Diet", description: "Learn about balanced diets and nutrition.", url: "https://nutritionfacts.org/blog/" },
+    { title: "Mental Wellbeing", description: "Mental health strategies for a balanced life.", url: "https://www.nhs.uk/mental-health/self-help/guides-tools-and-activities/five-steps-to-mental-wellbeing/" },
+  ];
   // Carousel settings with arrows
   const settings = {
     dots: true, // Show navigation dots
@@ -223,7 +228,7 @@ const Home = () => {
           {services.map((service, index) => (
             <div
               key={index}
-              className={`${theme === "light" ? " bg-gray-200" : "bg-customGray"} p-6 rounded-lg shadow-md hover:shadow-lg  transition transform hover:-translate-y-2 duration-300 mx-2`}
+              className={`${theme === "light" ? " bg-gray-200" : "bg-customGray"} p-6 rounded-3xl shadow-md hover:shadow-lg  transition transform hover:-translate-y-2 duration-300 mx-2`}
             >
               <h3 className={`text-xl font-semibold ${theme === "dark" ? " text-white" : "text-black"} mb-2`}>
                 {service.title}
@@ -233,7 +238,19 @@ const Home = () => {
           ))}
         </Slider>
       </section>
-
+      <section className="py-20" data-aos="fade-up">
+        <h2 className="text-3xl font-bold text-center mb-10">Health & Wellness Blogs</h2>
+        <div className="flex justify-center gap-6 flex-wrap">
+          {blogs.map((blog, index) => (
+            <div key={index} className={`${theme === "light" ? " bg-gray-200" : "bg-customGray"} p-6 rounded-lg shadow-md hover:shadow-lg transition transform hover:-translate-y-2 duration-300 max-w-sm`}>
+              <FaBookOpen className="text-3xl mb-4" />
+              <h3 className="text-xl font-semibold mb-2">{blog.title}</h3>
+              <p className={`${theme === "dark" ? " text-white" : "text-black"} mb-4`}>{blog.description}</p>
+              <a href={blog.url} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Read More</a>
+            </div>
+          ))}
+        </div>
+      </section>
       {/* Contact Us Section */}
       <section
         className="relative p-12 bg-cover bg-center text-white"

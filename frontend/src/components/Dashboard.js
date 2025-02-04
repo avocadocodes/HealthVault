@@ -59,14 +59,19 @@ const Dashboard = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      setAppointments(response.data); 
-      setEvents(
-        response.data.map((event) => ({
-          title: `${event.patientName} - ${event.healthIssue}`,
-          start: new Date(`${event.date}T${event.time}`),
-          end: new Date(`${event.date}T${event.time}`),
-        }))
-      );
+      console.log("Fetched Appointments:", response.data);
+      const appointmentsData = response.data.appointments || [];
+
+      setAppointments(appointmentsData);
+  
+      // // Update calendar events safely
+      // const calendarEvents = appointmentsData.map((appointment) => ({
+      //   title: `${appointment.patientName} - ${appointment.healthIssue}`,
+      //   start: new Date(`${appointment.date}T${appointment.time}`),
+      //   end: new Date(`${appointment.date}T${appointment.time}`),
+      // }));
+  
+      // setEvents(calendarEvents);
     } catch (err) {
       console.error("Failed to fetch appointments:", err);
     }
@@ -114,8 +119,18 @@ const Dashboard = () => {
           `${process.env.REACT_APP_API_URL}/appointments`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        console.log("Fetched Appointments:", response.data);
+        console.log("Fetched Appointments:", appointmentsResponse.data);
+        if (!response || !response.data) {
+          throw new Error("Invalid response received from API.");
+        }
         setAppointments(appointmentsResponse.data);
+        // const mappedEvents = appointmentsResponse.data.map((event) => ({
+        //   title: `${event.patientName} - ${event.healthIssue}`,
+        //   start: new Date(`${event.date}T${event.time}`),
+        //   end: new Date(`${event.date}T${event.time}`),
+        // }));
+        // setEvents(appointmentsResponse.data.events);
+        // setEvents(mappedEvents);
 
         // Fetch pending booking requests
         const bookingResponse = await axios.get(
@@ -128,19 +143,13 @@ const Dashboard = () => {
         setBookingRequests(bookingResponse.data);
 
         // Fetch calendar events
-        const calendarResponse = await axios.get(
-          `${process.env.REACT_APP_API_URL}/appointments`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setEvents(
-          calendarResponse.data.map((event) => ({
-            title: `${event.patientName} - ${event.healthIssue}`,
-            start: new Date(event.date + "T" + event.time),
-            end: new Date(event.date + "T" + event.time),
-          }))
-        );
+        // const calendarResponse = await axios.get(
+        //   `${process.env.REACT_APP_API_URL}/appointments`,
+        //   {
+        //     headers: { Authorization: `Bearer ${token}` },
+        //   }
+        // );
+        // setEvents(calendarResponse.data);
       } catch (err) {
         console.error(err);
         setError(err.response?.data?.message || "Failed to fetch dashboard data.");
@@ -202,8 +211,30 @@ const Dashboard = () => {
   
       if (action === "approve") {
         await fetchAppointments(); // Refresh appointments after approval
+        console.log("Approved Appointment Data:", response.data);
+        if (response.data.appointment) {
+          const approvedAppointment = response.data.appointment;
+        // setEvents((prevEvents) => [
+        //     ...prevEvents,
+        //     {
+        //       title: `${approvedAppointment.patientName} - ${approvedAppointment.healthIssue}`,
+        //       start: new Date(`${approvedAppointment.date}T${approvedAppointment.time}`),
+        //       end: new Date(`${approvedAppointment.date}T${approvedAppointment.time}`),
+        //     },
+        //   ]);
+        //   setEvents((prevEvents) => [
+        //     ...prevEvents,
+        //     {
+        //         title: approvedEvent.title,
+        //         start: new Date(approvedEvent.start),
+        //         end: new Date(approvedEvent.end),
+        //     },
+        // ]);
+          // setEvents(calendarResponse.data);
+        } else {
+          console.error("Error: Approved appointment data missing from response");
+        }
       }
-  
       toast.success(`Booking request ${action}ed successfully!`);
       setBookingRequests(bookingRequests.filter((req) => req._id !== id));
     } catch (err) {
@@ -308,29 +339,29 @@ const Dashboard = () => {
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <motion.div
-          className="bg-gray-800 p-6 rounded-lg shadow-md flex items-center justify-between"
+          className={`${theme === "light" ? " bg-gray-300" : "bg-customGray"} p-6 rounded-lg shadow-md flex items-center justify-between`}
           whileHover={{ scale: 1.05 }}
           onClick={()=> setShowPatientModal(true)}
         >
           <div>
             <h2 className="text-2xl font-semibold">1.4k</h2>
-            <p className="text-gray-400">Total Patients</p>
+            <p className={`${theme === "dark" ? " text-white" : "text-black"}`}>Total Patients</p>
           </div>
           <div className="text-blue-500 text-4xl">👤</div>
         </motion.div>
         <motion.div
-          className="bg-gray-800 p-6 rounded-lg shadow-md flex justify-between items-center cursor-pointer"
+          className={`${theme === "light" ? " bg-gray-300" : "bg-customGray"} p-6 rounded-lg shadow-md flex justify-between items-center cursor-pointer`}
           whileHover={{ scale: 1.05 }}
           onClick={() => setShowBookingModal(true)}
         >
           <div>
             <h2 className="text-2xl font-semibold">Pending Requests</h2>
-            <p className="text-gray-400">Booking requests</p>
+            <p className={`${theme === "dark" ? " text-white" : "text-black"}`}>Booking requests</p>
           </div>
           <div className="text-green-500 text-4xl">💬</div>
         </motion.div>
         <motion.div
-          className="bg-gray-800 p-6 rounded-lg shadow-md flex justify-between items-center cursor-pointer"
+          className={`${theme === "light" ? " bg-gray-300" : "bg-customGray"} p-6 rounded-lg shadow-md flex justify-between items-center cursor-pointer`}
           whileHover={{ scale: 1.05 }}
           onClick={() => setShowAppointmentModal(true)}
         >
@@ -346,7 +377,7 @@ const Dashboard = () => {
       {showPatientModal && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
           <motion.div
-            className="bg-gray-800 text-white w-3/4 max-w-3xl p-6 rounded-lg shadow-lg relative"
+            className={`${theme === "dark" ? "bg-customGrayLight text-white" : "bg-gray-300 text-black"} w-3/4 max-w-3xl p-6 rounded-lg shadow-lg relative`}
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -362,7 +393,7 @@ const Dashboard = () => {
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left">
-                <thead className="bg-gray-700 text-gray-300">
+                <thead className={`${theme === "dark" ? "bg-customGrayLight2 text-white" : "bg-white text-black"} `}>
                   <tr>
                     <th className="py-3 px-4">Name</th>
                     <th className="py-3 px-4">Age</th>
@@ -407,7 +438,7 @@ const Dashboard = () => {
     {showAppointmentModal && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
           <motion.div
-            className="bg-gray-800 text-white w-3/4 max-w-3xl p-6 rounded-lg shadow-lg overflow-y-auto"
+            className={`${theme === "dark" ? "bg-customGrayLight text-white" : "bg-gray-300 text-black"} w-3/4 max-w-3xl p-6 rounded-lg shadow-lg overflow-y-auto`}
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -434,7 +465,7 @@ const Dashboard = () => {
                   onChange={(e) =>
                     setNewAppointment({ ...newAppointment, patientName: e.target.value })
                   }
-                  className="p-3 bg-gray-700 rounded-md focus:outline-none"
+                  className={`p-3 ${theme === "dark" ? "bg-customGrayLight2 text-white" : "bg-white text-black"} rounded-md focus:outline-none`}
                 />
                 <input
                   type="text"
@@ -443,7 +474,7 @@ const Dashboard = () => {
                   onChange={(e) =>
                     setNewAppointment({ ...newAppointment, healthIssue: e.target.value })
                   }
-                  className="p-3 bg-gray-700 rounded-md focus:outline-none"
+                  className={`p-3 ${theme === "dark" ? "bg-customGrayLight2 text-white" : "bg-white text-black"} rounded-md focus:outline-none`}
                 />
                 <input
                   type="date"
@@ -451,7 +482,7 @@ const Dashboard = () => {
                   onChange={(e) =>
                     setNewAppointment({ ...newAppointment, date: e.target.value })
                   }
-                  className="p-3 bg-gray-700 rounded-md focus:outline-none"
+                  className={`p-3 ${theme === "dark" ? "bg-customGrayLight2 text-white" : "bg-white text-black"} rounded-md focus:outline-none`}
                 />
                 <input
                   type="time"
@@ -459,7 +490,7 @@ const Dashboard = () => {
                   onChange={(e) =>
                     setNewAppointment({ ...newAppointment, time: e.target.value })
                   }
-                  className="p-3 bg-gray-700 rounded-md focus:outline-none"
+                  className={`p-3 ${theme === "dark" ? "bg-customGrayLight2 text-white" : "bg-white text-black"} rounded-md focus:outline-none`}
                 />
               </div>
               <button
@@ -478,7 +509,7 @@ const Dashboard = () => {
                 
                 <div
                   key={appointment._id}
-                  className="bg-gray-700 p-4 rounded-md mb-4"
+                  className={`${theme === "dark" ? "bg-customGrayLight2 text-white" : "bg-white text-black"} p-4 rounded-md mb-4`}
                 >
                   <h4 className="font-semibold">{appointment.patientName}</h4>
                   <p>Issue: {appointment.healthIssue}</p>
@@ -491,7 +522,7 @@ const Dashboard = () => {
                     Mark as Visited
                   </button>
                   <button
-                    className="bg-red-500 px-4 py-2 mt-2 rounded-md hover:bg-red-600"
+                    className="bg-customMaroon px-4 py-2 mt-2 rounded-md hover:bg-red-600"
                     onClick={() => handleDeleteAppointment(appointment._id)}
                   >
                     Delete
@@ -505,9 +536,9 @@ const Dashboard = () => {
 
       {/* Booking Requests Modal */}
       {showBookingModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+        <div className={`fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50`}>
           <motion.div
-            className="bg-gray-800 text-white w-3/4 max-w-3xl p-6 rounded-lg shadow-lg overflow-y-auto"
+            className={`${theme === "dark" ? "bg-customGrayLight text-white" : "bg-gray-300 text-black"} w-3/4 max-w-3xl p-6 rounded-lg shadow-lg overflow-y-auto`}
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -526,7 +557,7 @@ const Dashboard = () => {
               bookingRequests.map((request) => (
                 <div
                   key={request._id}
-                  className="bg-gray-700 p-4 rounded-md mb-4 flex justify-between items-center"
+                  className={`${theme === "dark" ? "bg-customGrayLight2 text-white" : "bg-white text-black"} p-4 rounded-md mb-4 flex justify-between items-center`}
                 >
                   <div>
                     <h4 className="font-semibold">{request.patientName}</h4>
@@ -542,6 +573,7 @@ const Dashboard = () => {
                     >
                       Approve
                     </button>
+
 
 
                     {/* Cancel Button */}
@@ -581,15 +613,15 @@ const Dashboard = () => {
       )}
 
 
-      {/* Calendar Section */}
+      {/* Calendar Section
       <motion.div
-        className="bg-gray-800 p-6 rounded-lg shadow-lg"
+        className={`${theme === "dark" ? "bg-customGray text-white" : "bg-gray-200 text-black"} p-6 rounded-lg shadow-lg`}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
         <h2 className="text-xl font-semibold mb-4">Your Calendar</h2>
-        <div className="bg-gray-900 p-4 rounded-md shadow-md">
+        <div className={`${theme === "dark" ? "bg-customGrayLight2 text-white" : "bg-gray-500 text-black"} p-4 rounded-md shadow-md`}>
           <Calendar
             localizer={localizer}
             events={events}
@@ -599,7 +631,7 @@ const Dashboard = () => {
             className="text-white"
           />
         </div>
-      </motion.div>
+      </motion.div> */}
     </div>
   );
 };
