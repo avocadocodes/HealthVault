@@ -62,7 +62,7 @@ exports.updatePatient = async (req, res) => {
       runValidators: true,
     });
 
-    res.status(200).json(updatedPatient);
+    res.status(200).json({patient: updatedPatient});
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

@@ -29,9 +29,6 @@ const Dashboard = () => {
   const [bookingRequests, setBookingRequests] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [error, setError] = useState(null);
-  const [showPatientModal, setShowPatientModal] = useState(false);
-  const [showAppointmentModal, setShowAppointmentModal] = useState(false);
-  const [showBookingModal, setShowBookingModal] = useState(false);
   const [newAppointment, setNewAppointment] = useState({
     patientName: "",
     healthIssue: "",
@@ -87,7 +84,27 @@ const Dashboard = () => {
     console.log("Re-render triggered, Appointments:", appointments);
     setReload(prev => !prev);
   }, [appointments]);
-
+  const fetchPatients = async () => {
+    try {
+      console.log("Fetching patient data..."); // Debugging
+      const token = localStorage.getItem("token");
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/patients`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      console.log("Fetched Patients:", response.data);
+      if (Array.isArray(response.data)) {
+        setPatients(response.data);
+      } else {
+        console.error("Patients response is not an array!", response.data);
+        setPatients([]); // Prevent frontend crash
+      }
+      // setPatients(response.data);
+    } catch (err) {
+      console.error("Failed to fetch patients:", err);
+    }
+  };
+  
   const fetchDoctorDetails = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -103,6 +120,12 @@ const Dashboard = () => {
       toast.error("Failed to fetch doctor details.");
     }
   };
+  useEffect(() => {
+    if (activePage === "/patient-list") {
+      fetchPatients();
+    }
+  }, [activePage]);
+  
   useEffect(() => {
     if (activePage === "/appointments") {
       fetchAppointments(); 
@@ -204,7 +227,7 @@ const Dashboard = () => {
       );
   
       if (action === "approve") {
-        await fetchAppointments(); // Refresh appointments after approval
+        await fetchAppointments(); 
         console.log("Approved Appointment Data:", response.data);
         if (response.data.appointment) {
           const approvedAppointment = response.data.appointment;
@@ -255,8 +278,69 @@ const Dashboard = () => {
       toast.error("Failed to mark appointment as visited");
     }
   };
+  const handleAddPatient = async () => {
+    if (!newPatient.name || !newPatient.age || !newPatient.gender) {
+      toast.error("All fields are required!");
+      return;
+    }
   
+    try {
+      const token = localStorage.getItem("token");
+      console.log("Adding patient:", newPatient);
+  
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/patients`,
+        newPatient,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+  
+      if (response.data) {
+        setPatients((prev) => [...prev, response.data.patient]); // Add to state
+        toast.success("Patient added successfully!");
+        setNewPatient({ name: "", age: "", gender: "Male" }); // Reset form
+      } else {
+        throw new Error("Failed to receive response from the server");
+      }
+    } catch (err) {
+      console.error("Failed to add patient:", err);
+      toast.error("Failed to add patient.");
+    }
+  };
+  const handleUpdatePatient = async () => {
+    if (!editingPatient.name || !editingPatient.age || !editingPatient.gender || !editingPatient.issue || !editingPatient.medicines || !editingPatient.status) {
+      toast.error("All fields are required!");
+      return;
+    }
+  
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.put(
+        `${process.env.REACT_APP_API_URL}/patients/${editingPatient._id}`,
+        editingPatient,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+  
+      console.log("Updated Patient Response:", response.data); // ✅ Debugging
+  
+      if (response.data && response.data.patient) {
+        setPatients((prevPatients) =>
+          prevPatients.map((p) =>
+            p._id === editingPatient._id ? response.data.patient : p
+          )
+        );
+  
+        toast.success("Patient updated successfully!");
+        setEditingPatient(null); // ✅ Close edit form
+      } else {
+        throw new Error("Failed to receive updated patient data");
+      }
+    } catch (err) {
+      console.error("Failed to update patient:", err);
+      toast.error("Failed to update patient.");
+    }
+  };
 
+  
   useEffect(() => {
     const fetchBookingRequests = async () => {
       try {
@@ -275,6 +359,35 @@ const Dashboard = () => {
   
     fetchBookingRequests();
   }, []);
+  const [newPatient, setNewPatient] = useState({
+    name: "",
+    age: "",
+    gender: "Male", // Default to Male
+  });
+  const [editingPatient, setEditingPatient] = useState(null);
+  const handleEditPatient = (patient) => {
+    setEditingPatient(patient); // Set the patient to be edited
+  };
+  
+  const handleDeletePatient = async (patientId) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(
+        `${process.env.REACT_APP_API_URL}/patients/${patientId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+  
+      setPatients((prevPatients) =>
+        prevPatients.filter((patient) => patient._id !== patientId)
+      );
+  
+      toast.success("Patient deleted successfully!");
+    } catch (err) {
+      console.error("Failed to delete patient:", err);
+      toast.error("Failed to delete patient.");
+    }
+  };
+  
   
   return (
     <div className={`flex h-screen min-h-screen ${theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black"}`}>
@@ -326,8 +439,18 @@ const Dashboard = () => {
             </button>
             {activeMenu === "patients" && (
               <div className="pl-6">
-                <button className="w-full text-left py-2 px-4 hover:bg-gray-700 rounded" onClick={() => navigate("/patient-list")}>Patient List</button>
-                <button className="w-full text-left py-2 px-4 hover:bg-gray-700 rounded" onClick={() => navigate("/add-patient")}>Add Patient</button>
+                <button 
+                  className="w-full text-left py-2 px-4 hover:bg-gray-700 rounded" 
+                  onClick={() => {setActivePage("/patient-list");
+
+                  }}>
+                    Patient List
+                  </button>
+                <button 
+                  className="w-full text-left py-2 px-4 hover:bg-gray-700 rounded" 
+                  onClick={() => {setActivePage("/add-patient");
+
+                  }}>Add Patient</button>
               </div>
             )}
           </div>
@@ -489,282 +612,195 @@ const Dashboard = () => {
                 )}
                 </div>
           )} 
-        </div>         
-      {/* Overview Cards
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <motion.div
-          className={`${theme === "light" ? " bg-gray-300" : "bg-customGray"} p-6 rounded-lg shadow-md flex items-center justify-between`}
-          whileHover={{ scale: 1.05 }}
-          onClick={()=> setShowPatientModal(true)}
-        >
-          <div>
-            <h2 className="text-2xl font-semibold">1.4k</h2>
-            <p className={`${theme === "dark" ? " text-white" : "text-black"}`}>Total Patients</p>
-          </div>
-          <div className="text-blue-500 text-4xl">👤</div>
-        </motion.div>
-        <motion.div
-          className={`${theme === "light" ? " bg-gray-300" : "bg-customGray"} p-6 rounded-lg shadow-md flex justify-between items-center cursor-pointer`}
-          whileHover={{ scale: 1.05 }}
-          onClick={() => setShowBookingModal(true)}
-        >
-          <div>
-            <h2 className="text-2xl font-semibold">Pending Requests</h2>
-            <p className={`${theme === "dark" ? " text-white" : "text-black"}`}>Booking requests</p>
-          </div>
-          <div className="text-green-500 text-4xl">💬</div>
-        </motion.div>
-        <motion.div
-          className={`${theme === "light" ? " bg-gray-300" : "bg-customGray"} p-6 rounded-lg shadow-md flex justify-between items-center cursor-pointer`}
-          whileHover={{ scale: 1.05 }}
-          onClick={() => setShowAppointmentModal(true)}
-        >
-          <div>
-            <h2 className="text-2xl font-semibold">Appointments</h2>
-            {/* <p className="text-gray-400">Manually added</p> */}
-          {/* </div>
-          <div className="text-blue-500 text-4xl">📅</div> */}
-      {/* //   </motion.div> */}
-      {/* // </div> */} 
-
-      {/* Patients List Modal */}
-      {showPatientModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-          <motion.div
-            className={`${theme === "dark" ? "bg-customGrayLight text-white" : "bg-gray-300 text-black"} w-3/4 max-w-3xl p-6 rounded-lg shadow-lg relative`}
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold">Patients List</h2>
-              <button
-                onClick={() => setShowPatientModal(false)}
-                className="text-red-500 text-lg font-bold hover:text-red-600"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead className={`${theme === "dark" ? "bg-customGrayLight2 text-white" : "bg-white text-black"} `}>
-                  <tr>
-                    <th className="py-3 px-4">Name</th>
-                    <th className="py-3 px-4">Age</th>
-                    <th className="py-3 px-4">Gender</th>
-                    <th className="py-3 px-4">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {patients.map((patient) => (
-                    <tr
-                      key={patient._id}
-                      className="border-b border-gray-600 hover:bg-gray-700 transition"
-                    >
-                      <td className="py-3 px-4">{patient.name}</td>
-                      <td className="py-3 px-4">{patient.age}</td>
-                      <td className="py-3 px-4">{patient.gender}</td>
-                      <td className="py-3 px-4 flex space-x-2">
-                        <button
-                          onClick={() =>
-                            navigate(`/patients/${patient._id}/stats`)
-                          }
-                          className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600"
-                        >
-                          Stats
-                        </button>
-                        <button
-                          onClick={() => handleDelete(patient._id)}
-                          className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600"
-                        >
-                          Delete
-                        </button>
-                      </td>
+          
+          {activePage === "/patient-list" && (
+            <div className="p-6">
+              <h3 className="text-xl font-bold mb-4">Patients List</h3>
+              {patients.length > 0 ? (
+                <table className="w-full border-collapse border border-gray-300">
+                  <thead>
+                    <tr>
+                      <th className="border p-2">Name</th>
+                      <th className="border p-2">Age</th>
+                      <th className="border p-2">Gender</th>
+                      <th className="border p-2">Health Issue</th>
+                      <th className="border p-2">Medicine Prescribed</th>
+                      <th className="border p-2">Status</th>
+                      <th className="border p-2">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </motion.div>
-        </div>
-      )}
-    {/* Appointment Modal */}
-    {showAppointmentModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-          <motion.div
-            className={`${theme === "dark" ? "bg-customGrayLight text-white" : "bg-gray-300 text-black"} w-3/4 max-w-3xl p-6 rounded-lg shadow-lg overflow-y-auto`}
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            style={{ maxHeight: "80vh" }}
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">Appointments</h2>
-              <button
-                onClick={() => setShowAppointmentModal(false)}
-                className="text-red-500 text-lg font-bold hover:text-red-600"
-              >
-                ✕
-              </button>
-            </div>
+                  </thead>
+                  <tbody>
+                    {patients && patients.length > 0 ? (
+                      patients.map((patient) => (
+                        <tr key={patient?._id || Math.random()}>
+                          <td className="border p-2">{patient?.name || ""}</td>
+                          <td className="border p-2">{patient?.age}</td>
+                          <td className="border p-2">{patient?.gender }</td>
+                          <td className="border p-2">{patient?.issue }</td>
+                          <td className="border p-2">{patient?.medicines }</td>
+                          <td className="border p-2">{patient?.status}</td>
+                          <td className="border p-2 flex space-x-2">
+                            <button
+                              onClick={() => handleEditPatient(patient)}
+                              className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeletePatient(patient._id)}
+                              className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600"
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="7" className="text-center p-4">No Patients Found.</td>
+                      </tr>
+                    )}
+                  </tbody>
 
-            {/* Add Appointment */}
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-2">Add New Appointment</h3>
+                </table>
+              ) : (
+                <p className="text-gray-400">No Patients Found.</p>
+              )}
+            </div>
+          )}
+          {editingPatient && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white p-6 rounded-lg shadow-lg w-3/4 max-w-lg">
+                <h3 className="text-xl font-bold mb-4">Edit Patient</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <input
+                    type="text"
+                    placeholder="Patient Name"
+                    value={editingPatient.name}
+                    onChange={(e) => setEditingPatient({ ...editingPatient, name: e.target.value })}
+                    className="p-3 border rounded-md focus:outline-none"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Age"
+                    value={editingPatient.age}
+                    onChange={(e) => setEditingPatient({ ...editingPatient, age: e.target.value })}
+                    className="p-3 border rounded-md focus:outline-none"
+                  />
+                  <select
+                    value={editingPatient.gender}
+                    onChange={(e) => setEditingPatient({ ...editingPatient, gender: e.target.value })}
+                    className="p-3 border rounded-md focus:outline-none"
+                  >
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                  <input
+                    type="text"
+                    placeholder="Health Issue"
+                    value={editingPatient.issue}
+                    onChange={(e) => setEditingPatient({ ...editingPatient, issue: e.target.value })}
+                    className="p-3 border rounded-md focus:outline-none"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Prescribed Medicines"
+                    value={editingPatient.medicines}
+                    onChange={(e) => setEditingPatient({ ...editingPatient, medicines: e.target.value })}
+                    className="p-3 border rounded-md focus:outline-none"
+                  />
+                  <select
+                    value={editingPatient.status}
+                    onChange={(e) => setEditingPatient({ ...editingPatient, status: e.target.value })}
+                    className="p-3 border rounded-md focus:outline-none"
+                  >
+                    <option value="Critical">Critical</option>
+                    <option value="Mid-Risk">Mid-Risk</option>
+                    <option value="Low-Risk">Low-Risk</option>
+                  </select>
+                </div>
+                <div className="flex space-x-4 mt-4">
+                  <button
+                    onClick={handleUpdatePatient}
+                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                  >
+                    Update Patient
+                  </button>
+                  <button
+                    onClick={() => setEditingPatient(null)}
+                    className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activePage === "/add-patient" && (
+            <div className="p-6">
+              <h3 className="text-xl font-bold mb-4">Add New Patient</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input
                   type="text"
                   placeholder="Patient Name"
-                  value={newAppointment.patientName}
-                  onChange={(e) =>
-                    setNewAppointment({ ...newAppointment, patientName: e.target.value })
-                  }
+                  value={newPatient.name}
+                  onChange={(e) => setNewPatient({ ...newPatient, name: e.target.value })}
+                  className={`p-3 ${theme === "dark" ? "bg-customGrayLight2 text-white" : "bg-white text-black"} rounded-md focus:outline-none`}
+                />
+                <input
+                  type="number"
+                  placeholder="Age"
+                  value={newPatient.age}
+                  onChange={(e) => setNewPatient({ ...newPatient, age: e.target.value })}
+                  className={`p-3 ${theme === "dark" ? "bg-customGrayLight2 text-white" : "bg-white text-black"} rounded-md focus:outline-none`}
+                />
+
+                <select
+                  value={newPatient.gender}
+                  onChange={(e) => setNewPatient({ ...newPatient, gender: e.target.value })}
+                  className={`p-3 ${theme === "dark" ? "bg-customGrayLight2 text-white" : "bg-white text-black"} rounded-md focus:outline-none`}
+                >
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+                <input
+                  type="text"
+                  placeholder="Health Issue"
+                  value={newPatient.issue}
+                  onChange={(e) => setNewPatient({ ...newPatient, issue: e.target.value })}
                   className={`p-3 ${theme === "dark" ? "bg-customGrayLight2 text-white" : "bg-white text-black"} rounded-md focus:outline-none`}
                 />
                 <input
                   type="text"
-                  placeholder="Health Issue"
-                  value={newAppointment.healthIssue}
-                  onChange={(e) =>
-                    setNewAppointment({ ...newAppointment, healthIssue: e.target.value })
-                  }
+                  placeholder="Prescribed medicines"
+                  value={newPatient.medicines}
+                  onChange={(e) => setNewPatient({ ...newPatient, medicines: e.target.value })}
                   className={`p-3 ${theme === "dark" ? "bg-customGrayLight2 text-white" : "bg-white text-black"} rounded-md focus:outline-none`}
                 />
-                <input
-                  type="date"
-                  value={newAppointment.date}
-                  onChange={(e) =>
-                    setNewAppointment({ ...newAppointment, date: e.target.value })
-                  }
+                <select
+                  value={newPatient.status}
+                  onChange={(e) => setNewPatient({ ...newPatient, status: e.target.value })}
                   className={`p-3 ${theme === "dark" ? "bg-customGrayLight2 text-white" : "bg-white text-black"} rounded-md focus:outline-none`}
-                />
-                <input
-                  type="time"
-                  value={newAppointment.time}
-                  onChange={(e) =>
-                    setNewAppointment({ ...newAppointment, time: e.target.value })
-                  }
-                  className={`p-3 ${theme === "dark" ? "bg-customGrayLight2 text-white" : "bg-white text-black"} rounded-md focus:outline-none`}
-                />
+                >
+                  <option value="Crtical">Critical</option>
+                  <option value="Mid-Risk">Mid-Risk</option>
+                  <option value="Low-Risk">Low-Risk</option>
+                </select>
               </div>
               <button
-                onClick={handleAddAppointment}
+                onClick={handleAddPatient}
                 className="bg-blue-500 px-4 py-2 rounded-md mt-4 hover:bg-blue-600"
               >
-                Add Appointment
+                Add Patient
               </button>
             </div>
-
-            {/* Appointment List */}
-            <h3 className="text-lg font-semibold mb-4">Appointment List</h3>
-            <div>
-              
-              {appointments.map((appointment) => (
-                
-                <div
-                  key={appointment._id}
-                  className={`${theme === "dark" ? "bg-customGrayLight2 text-white" : "bg-white text-black"} p-4 rounded-md mb-4`}
-                >
-                  <h4 className="font-semibold">{appointment.patientName}</h4>
-                  <p>Issue: {appointment.healthIssue}</p>
-                  <p>Date: {new Date(appointment.date).toLocaleDateString()}</p>
-                  <p>Time: {appointment.time}</p>
-                  <button
-                    className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
-                    onClick={() => markAsVisited(appointment._id)}
-                  >
-                    Mark as Visited
-                  </button>
-                  <button
-                    className="bg-customMaroon px-4 py-2 mt-2 rounded-md hover:bg-red-600"
-                    onClick={() => handleDeleteAppointment(appointment._id)}
-                  >
-                    Delete
-                  </button>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        </div>
-      )}
-
-      {/* Booking Requests Modal */}
-      {showBookingModal && (
-        <div className={`fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50`}>
-          <motion.div
-            className={`${theme === "dark" ? "bg-customGrayLight text-white" : "bg-gray-300 text-black"} w-3/4 max-w-3xl p-6 rounded-lg shadow-lg overflow-y-auto`}
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            style={{ maxHeight: "80vh" }}
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">Pending Booking Requests</h2>
-              <button
-                onClick={() => setShowBookingModal(false)}
-                className="text-red-500 text-lg font-bold hover:text-red-600"
-              >
-                ✕
-              </button>
-            </div>
-            {bookingRequests.length > 0 ? (
-              bookingRequests.map((request) => (
-                <div
-                  key={request._id}
-                  className={`${theme === "dark" ? "bg-customGrayLight2 text-white" : "bg-white text-black"} p-4 rounded-md mb-4 flex justify-between items-center`}
-                >
-                  <div>
-                    <h4 className="font-semibold">{request.patientName}</h4>
-                    <p>Issue: {request.healthIssue}</p>
-                    <p>Date: {new Date(request.date).toLocaleDateString()}</p>
-                    <p>Time: {request.time}</p>
-                  </div>
-                  <div className="flex space-x-4">
-                    {/* Approve Button */}
-                    <button
-                      onClick={() => handleBookingAction(request._id, "approve")}
-                      className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
-                    >
-                      Approve
-                    </button>
+          )}
 
 
-
-                    {/* Cancel Button */}
-                    <button
-                      onClick={async () => {
-                        try {
-                          const token = localStorage.getItem("token");
-                          await axios.delete(
-                            `${process.env.REACT_APP_API_URL}/booking-requests/${request._id}`,
-                            {
-                              headers: { Authorization: `Bearer ${token}` },
-                            }
-                          );
-                          setBookingRequests((prevRequests) =>
-                            prevRequests.filter((req) => req._id !== request._id)
-                          );
-                          toast.success("Booking request canceled.");
-                        } catch (err) {
-                          console.error("Error canceling booking request:", err);
-                          toast.error("Failed to cancel booking request.");
-                        }
-                      }}
-                      
-                      className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
-                    >
-                      Cancel
-                    </button>
-
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-400">No pending booking requests.</p>
-            )}
-          </motion.div>
-        </div>
-      )}
+        </div>         
     </div>
   );
 };

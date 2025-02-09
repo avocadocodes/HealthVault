@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const EditPatient = () => {
-  const { id } = useParams(); // Get the patient ID from the URL
+  const { id } = useParams(); 
   const [formData, setFormData] = useState({
     name: "",
     age: "",

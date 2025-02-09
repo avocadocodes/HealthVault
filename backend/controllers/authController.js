@@ -4,7 +4,6 @@ const bcrypt = require("bcrypt");
 const redisClient= require("../utils/redisClient")
 const generateEmail= require("../utils/sendEmail")
 const createOTP= require("../utils/createOTP.js")
-// User registration
 
 const tokenTime=2
 
