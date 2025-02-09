@@ -6,7 +6,7 @@ const notificationSchema = new mongoose.Schema(
     message: { type: String, required: true }, // Notification message
     isSeen: { type: Boolean, default: false }, // Indicates if the notification has been seen
   },
-  { timestamps: true } // Automatically add createdAt and updatedAt fields
+  { timestamps: true } 
 );
 
 module.exports = mongoose.model("Notification", notificationSchema);

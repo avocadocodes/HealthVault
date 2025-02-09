@@ -2,14 +2,14 @@ const Appointment = require("../models/Appointment");
 
 const getAppointments = async (req, res) => {
   try {
-    console.log("Request body:", req.body); 
-    console.log("Decoded user:", req.user);
+    // console.log("Request body:", req.body); 
+    // console.log("Decoded user:", req.user);
     const appointments = await Appointment.find({ doctorId: req.user.id });
-    const events = appointments.map((appointment) => ({
-      title: `${appointment.patientName} - ${appointment.healthIssue}`,
-      start: new Date(appointment.date + "T" + appointment.time),
-      end: new Date(appointment.date + "T" + appointment.time),
-    }));
+    // const events = appointments.map((appointment) => ({
+    //   title: `${appointment.patientName} - ${appointment.healthIssue}`,
+    //   start: new Date(appointment.date + "T" + appointment.time),
+    //   end: new Date(appointment.date + "T" + appointment.time),
+    // }));
     res.status(200).json(appointments);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch appointments." });

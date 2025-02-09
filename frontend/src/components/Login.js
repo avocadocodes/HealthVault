@@ -22,7 +22,6 @@ const Login = ({ onLogin }) => {
       const { token, user } = response.data;
 
       onLogin(token, user.role);
-
       navigate(user.role === "doctor" ? "/dashboard" : "/patient-dashboard");
     } catch (err) {
       setError(err.response?.data?.message || "Login failed. Try again.");

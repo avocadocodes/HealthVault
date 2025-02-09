@@ -10,7 +10,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { useTheme } from "../context/ThemeContext";
-import { FaMoon, FaSun, FaSignOutAlt, FaUserInjured } from "react-icons/fa";
+import { FaMoon, FaSun, FaSignOutAlt, FaHome  , FaCalendarCheck, FaUser } from "react-icons/fa";
 const locales = {
   "en-US": require("date-fns/locale/en-US"),
 };
@@ -28,7 +28,6 @@ const Dashboard = () => {
   const [patients, setPatients] = useState([]);
   const [bookingRequests, setBookingRequests] = useState([]);
   const [appointments, setAppointments] = useState([]);
-  const [events, setEvents] = useState([]);
   const [error, setError] = useState(null);
   const [showPatientModal, setShowPatientModal] = useState(false);
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
@@ -39,6 +38,13 @@ const Dashboard = () => {
     date: "",
     time: "",
   });
+  const [activeMenu, setActiveMenu] = useState(null);
+
+  const toggleMenu = (menu) => {
+    setActiveMenu(activeMenu === menu ? null : menu);
+  };
+  const [activePage, setActivePage] = useState("/booking-requests");
+
   const { theme, toggleTheme } = useTheme();
   useEffect(() => {
     document.body.className = theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black";
@@ -50,6 +56,8 @@ const Dashboard = () => {
     localStorage.removeItem("role");
     navigate("/");
   };
+  const [reload, setReload] = useState(false);
+
   const fetchAppointments = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -63,19 +71,17 @@ const Dashboard = () => {
       const appointmentsData = response.data.appointments || [];
 
       setAppointments(appointmentsData);
-  
-      // // Update calendar events safely
-      // const calendarEvents = appointmentsData.map((appointment) => ({
-      //   title: `${appointment.patientName} - ${appointment.healthIssue}`,
-      //   start: new Date(`${appointment.date}T${appointment.time}`),
-      //   end: new Date(`${appointment.date}T${appointment.time}`),
-      // }));
-  
-      // setEvents(calendarEvents);
+      setTimeout(() => {
+        console.log("Updated Appointments State:", appointments);
+      }, 1000); 
     } catch (err) {
       console.error("Failed to fetch appointments:", err);
     }
   };
+  useEffect(() => {
+    console.log("Re-render triggered, Appointments:", appointments);
+    setReload(prev => !prev);
+  }, [appointments]);
 
   const fetchDoctorDetails = async () => {
     try {
@@ -92,9 +98,13 @@ const Dashboard = () => {
       toast.error("Failed to fetch doctor details.");
     }
   };
-
   useEffect(() => {
-    fetchDoctorDetails(); // Call the function here
+    if (activePage === "/appointments") {
+      fetchAppointments(); 
+    }
+  }, [activePage]); 
+  useEffect(() => {
+    fetchDoctorDetails(); 
   }, []);
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -105,7 +115,7 @@ const Dashboard = () => {
           navigate("/login");
           return;
         }
-         // Fetch patients
+        
         const patientsResponse = await axios.get(
           `${process.env.REACT_APP_API_URL}/patients`,
           {
@@ -120,19 +130,7 @@ const Dashboard = () => {
           { headers: { Authorization: `Bearer ${token}` } }
         );
         console.log("Fetched Appointments:", appointmentsResponse.data);
-        if (!response || !response.data) {
-          throw new Error("Invalid response received from API.");
-        }
         setAppointments(appointmentsResponse.data);
-        // const mappedEvents = appointmentsResponse.data.map((event) => ({
-        //   title: `${event.patientName} - ${event.healthIssue}`,
-        //   start: new Date(`${event.date}T${event.time}`),
-        //   end: new Date(`${event.date}T${event.time}`),
-        // }));
-        // setEvents(appointmentsResponse.data.events);
-        // setEvents(mappedEvents);
-
-        // Fetch pending booking requests
         const bookingResponse = await axios.get(
           `${process.env.REACT_APP_API_URL}/booking-requests`,
           {
@@ -141,15 +139,6 @@ const Dashboard = () => {
         );
         console.log("Booking Requests:", bookingRequests);
         setBookingRequests(bookingResponse.data);
-
-        // Fetch calendar events
-        // const calendarResponse = await axios.get(
-        //   `${process.env.REACT_APP_API_URL}/appointments`,
-        //   {
-        //     headers: { Authorization: `Bearer ${token}` },
-        //   }
-        // );
-        // setEvents(calendarResponse.data);
       } catch (err) {
         console.error(err);
         setError(err.response?.data?.message || "Failed to fetch dashboard data.");
@@ -214,23 +203,6 @@ const Dashboard = () => {
         console.log("Approved Appointment Data:", response.data);
         if (response.data.appointment) {
           const approvedAppointment = response.data.appointment;
-        // setEvents((prevEvents) => [
-        //     ...prevEvents,
-        //     {
-        //       title: `${approvedAppointment.patientName} - ${approvedAppointment.healthIssue}`,
-        //       start: new Date(`${approvedAppointment.date}T${approvedAppointment.time}`),
-        //       end: new Date(`${approvedAppointment.date}T${approvedAppointment.time}`),
-        //     },
-        //   ]);
-        //   setEvents((prevEvents) => [
-        //     ...prevEvents,
-        //     {
-        //         title: approvedEvent.title,
-        //         start: new Date(approvedEvent.start),
-        //         end: new Date(approvedEvent.end),
-        //     },
-        // ]);
-          // setEvents(calendarResponse.data);
         } else {
           console.error("Error: Approved appointment data missing from response");
         }
@@ -273,7 +245,6 @@ const Dashboard = () => {
       );
   
       toast.success("Appointment marked as visited");
-      // No need for an additional fetchAppointments here since the state is already updated.
     } catch (err) {
       console.error("Failed to mark appointment as visited:", err);
       toast.error("Failed to mark appointment as visited");
@@ -291,7 +262,7 @@ const Dashboard = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        setBookingRequests(response.data); // Ensure this data is displayed in the modal
+        setBookingRequests(response.data); 
       } catch (err) {
         console.error("Failed to fetch booking requests:", err);
       }
@@ -301,10 +272,64 @@ const Dashboard = () => {
   }, []);
   
   return (
-    <div className={`min-h-screen ${theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black"}`}>
+    <div className={`flex h-screen min-h-screen ${theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black"}`}>
+      
+    {/* Sidebar */}
+      <aside className="w-64 min-h-screen bg-gray-900 text-white p-4 flex flex-col">
+        <h2 className="text-xl font-bold mb-6">Dashboard</h2>
+        <nav>
+          <div>
+            <button
+              className="w-full text-left py-2 px-4 hover:bg-gray-700 rounded"
+              onClick={() => toggleMenu("appointments")}
+            >
+              <FaCalendarCheck className="inline-block mr-2" /> Appointments
+            </button>
+            {activeMenu === "appointments" && (
+              <div className="pl-6">
+                
+                <button
+                  className="w-full text-left py-2 px-4 hover:bg-gray-700 rounded"
+                  onClick={() => setActivePage("/booking-requests")}
+                >
+                  Booking Requests
+                </button>
+                <button
+                  className="w-full text-left py-2 px-4 hover:bg-gray-700 rounded"
+                  onClick={() => setActivePage("/add-appointment")}
+                >
+                  Add Appointment
+                </button>
+                <button
+                  className="w-full text-left py-2 px-4 hover:bg-gray-700 rounded"
+                  onClick={() => {setActivePage("/appointments");
+        
+                  }}
+                >
+                  Appointments
+                </button>
+              </div>
+            )}
+            
+          </div>
+          <div>
+            <button
+              className="w-full text-left py-2 px-4 hover:bg-gray-700 rounded"
+              onClick={() => toggleMenu("patients")}
+            >
+              <FaUser className="inline-block mr-2" /> Patients
+            </button>
+            {activeMenu === "patients" && (
+              <div className="pl-6">
+                <button className="w-full text-left py-2 px-4 hover:bg-gray-700 rounded" onClick={() => navigate("/patient-list")}>Patient List</button>
+                <button className="w-full text-left py-2 px-4 hover:bg-gray-700 rounded" onClick={() => navigate("/add-patient")}>Add Patient</button>
+              </div>
+            )}
+          </div>
+        </nav>
+      </aside>
       {/* Header Section */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-4xl font-bold">Welcome {doctorName ? `Dr. ${doctorName}` : " "}👋</h1>
+      <div className="flex items-center justify-end pr-64 pl-10 mb-6 fixed w-full top-0 left-64 z-50">
         <div className="flex space-x-4">
           <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-gray-700">
             {theme === "light" ? (
@@ -314,13 +339,13 @@ const Dashboard = () => {
             )}
           </button>
           <button
-            onClick={() => navigate("/register-patient")}
+            onClick={() => navigate("/")}
             className="p-2 rounded-full hover:bg-gray-700"
           >
             {theme === "light" ? (
-              <FaUserInjured className="text-black dark:text-white" />
+              <FaHome  className="text-black dark:text-white" />
             ) : (
-              <FaUserInjured className="text-white dark:text-white" />
+              <FaHome  className="text-white dark:text-white" />
             )}
           </button>
           <button
@@ -335,8 +360,132 @@ const Dashboard = () => {
           </button>
         </div>
       </div>
+      {/* Dynamic Page Content */}
+        <div className="p-6 flex-1 overflow-auto">
+          {activePage === "/booking-requests" && (
+            <div>
+              <h3 className="text-xl font-bold mb-4">Booking Requests</h3>
+              {bookingRequests.length > 0 ? (
+                bookingRequests.map((request) => (
+                  <div
+                    key={request._id}
+                    className={`${
+                      theme === "dark" ? "bg-customGrayLight2 text-white" : "bg-white text-black"
+                    } p-4 rounded-md mb-4 flex justify-between items-center`}
+                  >
+                    <div>
+                      <h4 className="font-semibold">{request.patientName}</h4>
+                      <p>Issue: {request.healthIssue}</p>
+                      <p>Date: {new Date(request.date).toLocaleDateString()}</p>
+                      <p>Time: {request.time}</p>
+                    </div>
+                    <div className="flex space-x-4">
+                      {/* Approve Button */}
+                      <button
+                        onClick={() => handleBookingAction(request._id, "approve")}
+                        className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
+                      >
+                        Approve
+                      </button>
 
-      {/* Overview Cards */}
+                      {/* Cancel Button */}
+                      <button
+                        onClick={() => handleBookingAction(request._id, "cancel")}
+                        className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-400">No pending booking requests.</p>
+              )}
+            </div>
+          )}
+           {activePage === "/add-appointment" && (
+            <div>
+              <h3 className="text-xl font-bold mb-4">Add New Appointment</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <input
+                type="text"
+                placeholder="Patient Name"
+                value={newAppointment.patientName}
+                onChange={(e) =>
+                  setNewAppointment({ ...newAppointment, patientName: e.target.value })
+                }
+                className={`p-3 ${theme === "dark" ? "bg-customGrayLight2 text-white" : "bg-white text-black"} rounded-md focus:outline-none`}
+              />
+              <input
+                type="text"
+                placeholder="Health Issue"
+                value={newAppointment.healthIssue}
+                onChange={(e) =>
+                  setNewAppointment({ ...newAppointment, healthIssue: e.target.value })
+                }
+                className={`p-3 ${theme === "dark" ? "bg-customGrayLight2 text-white" : "bg-white text-black"} rounded-md focus:outline-none`}
+              />
+              <input
+                type="date"
+                value={newAppointment.date}
+                onChange={(e) =>
+                  setNewAppointment({ ...newAppointment, date: e.target.value })
+                }
+                className={`p-3 ${theme === "dark" ? "bg-customGrayLight2 text-white" : "bg-white text-black"} rounded-md focus:outline-none`}
+              />
+              <input
+                type="time"
+                value={newAppointment.time}
+                onChange={(e) =>
+                  setNewAppointment({ ...newAppointment, time: e.target.value })
+                }
+                className={`p-3 ${theme === "dark" ? "bg-customGrayLight2 text-white" : "bg-white text-black"} rounded-md focus:outline-none`}
+              />
+              </div>
+              <button
+                onClick={handleAddAppointment}
+                className="bg-blue-500 px-4 py-2 rounded-md mt-4 hover:bg-blue-600"
+              >
+                Add Appointment
+              </button>
+            </div>
+           )}
+          {activePage === "/appointments" && (
+              <div>
+                <h3 className="text-xl font-bold mb-4">Appointments</h3>
+                {appointments && appointments.length > 0 ? (
+                  appointments.map((appointment) => (
+                    <div
+                      key={appointment._id}
+                      className={`${
+                        theme === "dark" ? "bg-customGrayLight2 text-white" : "bg-white text-black"
+                      } p-4 rounded-md mb-4`}
+                    >
+                      <h4 className="font-semibold">{appointment.patientName}</h4>
+                      <p>Issue: {appointment.healthIssue}</p>
+                      <p>Date: {new Date(appointment.date).toLocaleDateString()}</p>
+                      <p>Time: {appointment.time}</p>
+                      <button
+                        className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
+                        onClick={() => markAsVisited(appointment._id)}
+                      >
+                        Mark as Visited
+                      </button>
+                      <button
+                        className="bg-customMaroon px-4 py-2 mt-2 rounded-md hover:bg-red-600"
+                        onClick={() => handleDeleteAppointment(appointment._id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-400">No Appointments Scheduled.</p>
+                )}
+                </div>
+          )} 
+        </div>         
+      {/* Overview Cards
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <motion.div
           className={`${theme === "light" ? " bg-gray-300" : "bg-customGray"} p-6 rounded-lg shadow-md flex items-center justify-between`}
@@ -368,10 +517,10 @@ const Dashboard = () => {
           <div>
             <h2 className="text-2xl font-semibold">Appointments</h2>
             {/* <p className="text-gray-400">Manually added</p> */}
-          </div>
-          <div className="text-blue-500 text-4xl">📅</div>
-        </motion.div>
-      </div>
+          {/* </div>
+          <div className="text-blue-500 text-4xl">📅</div> */}
+      {/* //   </motion.div> */}
+      {/* // </div> */} 
 
       {/* Patients List Modal */}
       {showPatientModal && (
@@ -611,27 +760,6 @@ const Dashboard = () => {
           </motion.div>
         </div>
       )}
-
-
-      {/* Calendar Section
-      <motion.div
-        className={`${theme === "dark" ? "bg-customGray text-white" : "bg-gray-200 text-black"} p-6 rounded-lg shadow-lg`}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
-        <h2 className="text-xl font-semibold mb-4">Your Calendar</h2>
-        <div className={`${theme === "dark" ? "bg-customGrayLight2 text-white" : "bg-gray-500 text-black"} p-4 rounded-md shadow-md`}>
-          <Calendar
-            localizer={localizer}
-            events={events}
-            startAccessor="start"
-            endAccessor="end"
-            style={{ height: 400 }}
-            className="text-white"
-          />
-        </div>
-      </motion.div> */}
     </div>
   );
 };

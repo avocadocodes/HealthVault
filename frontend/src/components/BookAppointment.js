@@ -27,7 +27,7 @@ const BookAppointment = () => {
       const token = localStorage.getItem("token");
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/booking-requests`,
-        { ...formData, doctorId }, // Pass doctorId explicitly
+        { ...formData, doctorId }, 
         {
           headers: { Authorization: `Bearer ${token}` },
         }
