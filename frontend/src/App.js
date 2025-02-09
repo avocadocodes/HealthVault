@@ -7,7 +7,7 @@ import Dashboard from "./components/Dashboard";
 // import RegisterPatient from "./components/RegisterPatient";
 import RegisterUser from "./components/RegisterUser";
 import { ToastContainer } from "react-toastify";
-import EditPatient from "./components/EditPatient";
+// import EditPatient from "./components/EditPatient";
 import PatientDetails from "./components/PatientDetails";
 import PatientDashboard from "./components/PatientDashboard";
 import BookAppointment from "./components/BookAppointment";
@@ -65,7 +65,7 @@ const App = () => {
           )}
 
           {/* Additional Routes */}
-          <Route path="/patients/edit/:id" element={<EditPatient />} />
+          {/* <Route path="/patients/edit/:id" element={<EditPatient />} /> */}
           <Route path="/patients/:id/stats" element={<PatientDetails />} />
           <Route path="/book-appointment/:doctorId" element={<BookAppointment />} />
           <Route path="/patient-appointments" element={<PatientAppointments />} />

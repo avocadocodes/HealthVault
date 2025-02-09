@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const PatientDetails = () => {
-  const { id } = useParams(); // Get patient ID from URL
+  const { id } = useParams(); 
   const [patient, setPatient] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -28,7 +28,7 @@ const PatientDetails = () => {
           }
         );
         setPatient(response.data);
-        setFormData(response.data); // Pre-fill the form data
+        setFormData(response.data); 
       } catch (err) {
         setError(err.response?.data?.message || "Failed to fetch patient details.");
       }
@@ -52,8 +52,8 @@ const PatientDetails = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      setPatient(formData); // Update patient state with new data
-      setIsEditing(false); // Exit editing mode
+      setPatient(formData); 
+      setIsEditing(false); 
       alert("Patient details updated successfully!");
     } catch (err) {
       setError(err.response?.data?.message || "Failed to update patient details.");

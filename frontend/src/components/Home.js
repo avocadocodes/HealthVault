@@ -5,10 +5,8 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import HeroImage from "../images/hero.jpg";
 import HeroImageBlack from "../images/heroblack.png";
 import HeroImageWhite from "../images/herowhite.png";
-import ContactImage from "../images/contact.jpg";
 import { useTheme } from "../context/ThemeContext";
 import { FaMoon, FaSun, FaSignOutAlt,FaUserPlus, FaTachometerAlt, FaSignInAlt, FaBookOpen } from "react-icons/fa";
 

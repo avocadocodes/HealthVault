@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Calendar, dateFnsLocalizer } from "react-big-calendar";
+import { dateFnsLocalizer } from "react-big-calendar";
 import format from "date-fns/format";
 import parse from "date-fns/parse";
 import startOfWeek from "date-fns/startOfWeek";
@@ -10,11 +9,11 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { useTheme } from "../context/ThemeContext";
-import { FaMoon, FaSun, FaSignOutAlt, FaHome  , FaCalendarCheck, FaUser } from "react-icons/fa";
+import { FaMoon, FaSun, FaSignOutAlt, FaHome  , FaCalendarCheck, FaUser, FaMoneyBillWave } from "react-icons/fa";
+
 const locales = {
   "en-US": require("date-fns/locale/en-US"),
 };
-
 const localizer = dateFnsLocalizer({
   format,
   parse,
@@ -46,6 +45,17 @@ const Dashboard = () => {
   });
   const [editingPatient, setEditingPatient] = useState(null);
   const [payments, setPayments] = useState([]);
+  const [newPayment, setNewPayment] = useState({
+    name: "",
+    amount: "",
+    type: "Credit Card", 
+    transactionId: "",
+    paymentStatus: "Pending",
+  });
+  const [pendingPayments, setPendingPayments] = useState([]);
+  const [selectedPayment, setSelectedPayment] = useState(null); 
+  const [paymentDetails, setPaymentDetails] = useState({ type: "", transactionId: "" });
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const toggleMenu = (menu) => {
     setActiveMenu(activeMenu === menu ? null : menu);
@@ -308,6 +318,89 @@ const Dashboard = () => {
       setPayments([]); 
     }
   };
+  const handleCreatePayment = async () => {
+    const formattedPayment = {
+      ...newPayment,
+      amount: Number(newPayment.amount), 
+      transactionId: newPayment.paymentStatus === "Completed" ? newPayment.transactionId : undefined,
+      type: newPayment.paymentStatus === "Completed" ? newPayment.type : undefined, 
+      remarks: newPayment.remarks || "",
+    };
+    console.log("Submitting Payment Data:", formattedPayment);
+    if (!newPayment.name || !newPayment.amount ||  !newPayment.paymentStatus) {
+      toast.error("All fields are required!");
+      return;
+    }
+    if (newPayment.paymentStatus === "Completed" && (!newPayment.type || !newPayment.transactionId)) {
+      toast.error("Payment Type and Transaction ID are required for completed payments!");
+      return;
+    }
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/finance/payments`,
+        formattedPayment,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+  
+      if (response.data.payment) {
+        if (formattedPayment.paymentStatus === "Completed") {
+          setPayments((prevPayments) => [...prevPayments, response.data.payment]);
+        } else {
+          setPendingPayments((prevPayments) => [...prevPayments, response.data.payment]);
+        }
+  
+        toast.success("Payment added successfully!");
+        setNewPayment({ name: "", amount: "", type: "", transactionId: "", remarks: "", paymentStatus: "Pending" });
+        setActivePage(formattedPayment.paymentStatus === "Completed" ? "/payments" : "/pending-payments");
+        console.log("Submitting Payment Data:", JSON.stringify(formattedPayment, null, 2));
+
+      } else {
+        throw new Error("Failed to receive payment response from the server");
+      }
+    } catch (err) {
+      console.error("Failed to create payment:", err);
+      toast.error("Failed to add payment.");
+    }
+  };
+  const fetchPendingPayments = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/finance/pending-payments`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+  
+      console.log("Fetched Pending Payments:", response.data);
+      setPendingPayments(response.data || []);
+    } catch (err) {
+      console.error("Failed to fetch pending payments:", err);
+      setPendingPayments([]);
+    }
+  };
+  const handleCompletePayment = (payment) => {
+    setSelectedPayment(payment);
+    setIsModalOpen(true);
+  };
+  const handleSubmitPayment = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.put(
+        `${process.env.REACT_APP_API_URL}/finance/complete-payment/${selectedPayment._id}`,
+        paymentDetails,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+  
+      toast.success("Payment marked as completed!");
+      setIsModalOpen(false);
+  
+      setPendingPayments((prev) => prev.filter((p) => p._id !== selectedPayment._id));
+    } catch (err) {
+      console.error("Failed to complete payment:", err);
+      toast.error("Failed to mark payment as completed.");
+    }
+  };
+  
   
   useEffect(() => {
     if (activePage === "/patient-list") {
@@ -398,6 +491,11 @@ const Dashboard = () => {
       fetchPayments();
     }
   }, [activePage]);
+  useEffect(() => {
+    if (activePage === "/pending-payments") {
+      fetchPendingPayments();
+    }
+  }, [activePage]);
   
   return (
     <div className={`flex h-screen min-h-screen ${theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black"}`}>
@@ -467,7 +565,7 @@ const Dashboard = () => {
               className="w-full text-left py-2 px-4 hover:bg-gray-700 rounded"
               onClick={() => toggleMenu("finance")}
             >
-              💰 Finance
+              <FaMoneyBillWave className="inline-block mr-2 " />Finance
             </button>
             {activeMenu === "finance" && (
               <div className="pl-6">
@@ -475,13 +573,19 @@ const Dashboard = () => {
                   className="w-full text-left py-2 px-4 hover:bg-gray-700 rounded" 
                   onClick={() => setActivePage("/payments")}
                 >
-                  Payments
+                  Completed Payments
                 </button>
                 <button 
                   className="w-full text-left py-2 px-4 hover:bg-gray-700 rounded" 
-                  onClick={() => setActivePage("/create-invoice")}
+                  onClick={() => setActivePage("/create-payment")}
                 >
-                  Create Invoice
+                  Add Payments
+                </button>
+                <button 
+                  className="w-full text-left py-2 px-4 hover:bg-gray-700 rounded" 
+                  onClick={() => setActivePage("/pending-payments")}
+                >
+                  Pending Payments
                 </button>
               </div>
             )}
@@ -838,9 +942,8 @@ const Dashboard = () => {
                 <thead>
                   <tr>
                     <th className="border p-2">Name</th>
-                    <th className="border p-2">Amount (USD)</th>
-                    <th className="border p-2">Payment Type</th>
                     <th className="border p-2">Amount (INR)</th>
+                    <th className="border p-2">Payment Type</th>
                     <th className="border p-2">Transaction ID</th>
                   </tr>
                 </thead>
@@ -848,9 +951,8 @@ const Dashboard = () => {
                   {payments.map((payment, index) => (
                     <tr key={index}>
                       <td className="border p-2">{payment.name}</td>
-                      <td className="border p-2">${payment.amount}</td>
+                      <td className="border p-2">{payment.amount}</td>
                       <td className="border p-2">{payment.type}</td>
-                      <td className="border p-2">₹{payment.inr}</td>
                       <td className="border p-2">{payment.transactionId}</td>
                     </tr>
                   ))}
@@ -859,6 +961,147 @@ const Dashboard = () => {
             ) : (
               <p className="text-gray-400">No payments found.</p>
             )}
+          </div>
+        )}
+        {activePage === "/create-payment" && (
+          <div className="p-6">
+            <h3 className="text-xl font-bold mb-4">Add a payment</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <input
+                type="text"
+                placeholder="Payer Name"
+                value={newPayment.name}
+                onChange={(e) => setNewPayment({ ...newPayment, name: e.target.value })}
+                className="p-3 border rounded-md focus:outline-none"
+              />
+              <input
+                type="number"
+                placeholder="Amount (INR)"
+                value={newPayment.amount}
+                onChange={(e) => setNewPayment({ ...newPayment, amount: e.target.value })}
+                className="p-3 border rounded-md focus:outline-none"
+              />
+              <input
+                type="text"
+                placeholder="Remarks"
+                value={newPayment.remarks}
+                onChange={(e) => setNewPayment({ ...newPayment, remarks: e.target.value })}
+                className="p-3 border rounded-md focus:outline-none"
+              />
+              <select
+                value={newPayment.status}
+                onChange={(e) => setNewPayment({ ...newPayment, status: e.target.value })}
+                className="p-3 border rounded-md focus:outline-none"
+              >
+                <option value="Pending">Pending</option>
+                <option value="Completed">Completed</option>
+              </select>
+              {newPayment.status === "Completed" && (
+                <>
+                  <select
+                    value={newPayment.type}
+                    onChange={(e) => setNewPayment({ ...newPayment, type: e.target.value })}
+                    className="p-3 border rounded-md focus:outline-none"
+                  >
+                    <option value="">Select Payment Type</option>
+                    <option value="Credit Card">Credit Card</option>
+                    <option value="PayPal">PayPal</option>
+                    <option value="UPI">UPI</option>
+                    <option value="Bank Transfer">Bank Transfer</option>
+                  </select>
+                  <input
+                    type="text"
+                    placeholder="Transaction ID"
+                    value={newPayment.transactionId}
+                    onChange={(e) => setNewPayment({ ...newPayment, transactionId: e.target.value })}
+                    className="p-3 border rounded-md focus:outline-none"
+                  />
+                </>
+              )}
+            </div>
+            <button
+              onClick={handleCreatePayment}
+              className="bg-blue-500 px-4 py-2 rounded-md mt-4 hover:bg-blue-600"
+            >
+              Add Payment
+            </button>
+          </div>
+        )}
+        {activePage === "/pending-payments" && (
+          <div className="p-6">
+            <h3 className="text-xl font-bold mb-4">Pending Payments</h3>
+            {pendingPayments.length > 0 ? (
+              <table className="w-full border-collapse border border-gray-300">
+                <thead>
+                  <tr>
+                    <th className="border p-2">Name</th>
+                    <th className="border p-2">Amount</th>
+                    <th className="border p-2">Remarks</th>
+                    <th className="border p-2">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pendingPayments.map((payment) => (
+                    <tr key={payment._id}>
+                      <td className="border p-2">{payment.name}</td>
+                      <td className="border p-2">${payment.amount}</td>
+                      <td className="border p-2">{payment.remarks||"N/A"}</td>
+                      <td className="border p-2">
+                        <button
+                          onClick={() => handleCompletePayment(payment)}
+                          className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600"
+                        >
+                          Complete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p className="text-gray-400">No pending payments found.</p>
+            )}
+          </div>
+        )}
+        {isModalOpen && selectedPayment && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg shadow-lg w-3/4 max-w-lg">
+              <h3 className="text-xl font-bold mb-4">Complete Payment</h3>
+              <div className="grid grid-cols-1 gap-4">
+                <select
+                  value={paymentDetails.type}
+                  onChange={(e) => setPaymentDetails({ ...paymentDetails, type: e.target.value })}
+                  className="p-3 border rounded-md focus:outline-none"
+                >
+                  <option value="">Select Payment Type</option>
+                  <option value="Credit Card">Credit Card</option>
+                  <option value="PayPal">PayPal</option>
+                  <option value="UPI">UPI</option>
+                  <option value="Bank Transfer">Bank Transfer</option>
+                </select>
+                <input
+                  type="text"
+                  placeholder="Transaction ID"
+                  value={paymentDetails.transactionId}
+                  onChange={(e) => setPaymentDetails({ ...paymentDetails, transactionId: e.target.value })}
+                  className="p-3 border rounded-md focus:outline-none"
+                />
+              </div>
+              <div className="flex space-x-4 mt-4">
+                <button
+                  onClick={handleSubmitPayment}
+                  className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
+                >
+                  Submit
+                </button>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
         )}
 

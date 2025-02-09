@@ -10,9 +10,7 @@ const authMiddleware = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log("Decoded user:", decoded); // Log the decoded token
     req.user = await User.findById(decoded.id).select("-password");
-    console.log("User found in DB:", req.user); // Log the user fetched from DB
     next();
   } catch (err) {
     console.error("Token error:", err.message);

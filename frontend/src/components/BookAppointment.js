@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
-
-
 const BookAppointment = () => {
   const { doctorId } = useParams(); 
   const [formData, setFormData] = useState({

@@ -15,27 +15,72 @@ exports.getPayments = async (req, res) => {
 
 exports.addPayment = async (req, res) => {
   try {
-    const { name, amount, type, inr, transactionId } = req.body;
+    console.log("Received Payment Data:", req.body);
+    const { name, amount, type, transactionId, paymentStatus, remarks } = req.body;
 
-    if (!name || !amount || !type || !inr || !transactionId) {
+    if (!name || !amount ||  !paymentStatus) {
       return res.status(400).json({ error: "All fields are required" });
     }
-
+    if (paymentStatus === "Completed" && (!type || !transactionId)) {
+      return res.status(400).json({ error: "Payment Type and Transaction ID are required for completed payments" });
+    }
     const token = req.headers.authorization.split(" ")[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const newPayment = new Payment({
       user: decoded.id,
       name,
-      amount,
-      type,
-      inr,
-      transactionId,
+      amount:Number(amount),
+      type:paymentStatus === "Completed" ? type : undefined,
+      transactionId: paymentStatus === "Completed" ? transactionId : undefined,
+      remarks: remarks || "",
+      paymentStatus,
     });
 
     await newPayment.save();
     res.status(201).json({ message: "Payment added successfully", payment: newPayment });
   } catch (err) {
+    console.error("Error adding payment:", err);
     res.status(500).json({ error: "Failed to add payment" });
   }
 };
+
+exports.getPendingPayments = async (req, res) => {
+  try {
+    const token = req.headers.authorization.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    const pendingPayments = await Payment.find(
+      { user: decoded.id, paymentStatus: "Pending"}, 
+      "name amount remarks paymentStatus"
+    );
+    res.status(200).json(pendingPayments);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch pending payments" });
+  }
+};
+
+exports.completePayment = async (req, res) => {
+  try {
+    const { type, transactionId } = req.body;
+
+    if (!type || !transactionId) {
+      return res.status(400).json({ error: "Payment Type and Transaction ID are required" });
+    }
+
+    const updatedPayment = await Payment.findByIdAndUpdate(
+      req.params.id,
+      { type, transactionId, paymentStatus: "Completed" },
+      { new: true }
+    );
+
+    if (!updatedPayment) {
+      return res.status(404).json({ error: "Payment not found" });
+    }
+
+    res.status(200).json({ message: "Payment marked as completed", payment: updatedPayment });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to complete payment" });
+  }
+};
+

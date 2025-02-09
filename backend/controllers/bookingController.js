@@ -1,6 +1,6 @@
 const BookingRequest = require("../models/BookingRequest");
 const Appointment = require("../models/Appointment");
-const CalendarEvent = require("../models/CalendarEvent");
+// const CalendarEvent = require("../models/CalendarEvent");
 const mongoose = require("mongoose");
 // const moment = require("moment");
 
