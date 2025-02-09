@@ -4,7 +4,7 @@ const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-router.get("/", authMiddleware, getAppointments);
+router.get("/", authMiddleware, getPatientAppointments);
 router.delete("/:id", authMiddleware, deleteAppointment);
 router.post("/", authMiddleware, createAppointment);
 router.get("/patient", authMiddleware, getPatientAppointments);

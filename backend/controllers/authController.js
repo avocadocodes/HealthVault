@@ -1,8 +1,14 @@
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-
+const redisClient= require("../utils/redisClient")
+const generateEmail= require("../utils/sendEmail")
+const createOTP= require("../utils/createOTP.js")
 // User registration
+
+const tokenTime=2
+
+
 exports.register = async (req, res) => {
   const { name, email, password, role, specialty } = req.body;
   try {
@@ -10,19 +16,40 @@ exports.register = async (req, res) => {
     if (role === "doctor" && !specialty) {
       return res.status(400).json({ message: "Specialty is required for doctors" });
     }
-
+    const token = createOTP()
+    const otp=await generateEmail(name,email,token,tokenTime)
+    await redisClient.set(email,token,'EX',tokenTime*60)
+    console.log(otp);
+    res.json({message:`Email sent to ${email} , please verify the token`})
     // Hash password before saving
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ name, email, password: hashedPassword, role, specialty });
-    await user.save();
+    // const hashedPassword = await bcrypt.hash(password, 10);
+    // const user = new User({ name, email, password: hashedPassword, role, specialty });
+    // await user.save();
 
-    res.status(201).json({ message: "User registered successfully", user });
+    // res.status(201).json({ message: "User registered successfully", user });
   } catch (error) {
     console.error("Error during registration:", error);
     res.status(500).json({ error: error.message });
   }
 };
 
+
+exports.verify= async (req,res)=>{
+    try {
+      const {name, email, password, role, specialty,enteredToken}=req.body
+      const otp=await redisClient.get(email)
+
+      if(otp!=enteredToken)res.status(401).json({message:"Wrong token"})
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const user = new User({ name, email, password: hashedPassword, role, specialty });
+      await user.save();
+  
+      res.status(201).json({ message: "User registered successfully", user });
+  } catch (error) {
+      console.log(error)
+      res.json({error:error.message})
+  }
+}
 // User login
 exports.login = async (req, res) => {
   const { email, password } = req.body;

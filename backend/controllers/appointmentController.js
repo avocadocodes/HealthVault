@@ -62,10 +62,10 @@ const getPatientAppointments = async (req, res) => {
       patientId,
       status: "upcoming",
     }).populate("doctorId", "name");
-    const completedAppointments = await Appointment.find({
-      patientId,
-      status: "completed",
-    }).populate("doctorId", "name");
+    // const completedAppointments = await Appointment.find({
+    //   patientId,
+    //   status: "completed",
+    // }).populate("doctorId", "name");
 
     res.status(200).json({ upcomingAppointments, completedAppointments });
   } catch (err) {
