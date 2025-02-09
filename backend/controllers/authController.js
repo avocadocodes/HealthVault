@@ -7,7 +7,12 @@ const createOTP= require("../utils/createOTP.js")
 
 const tokenTime=2
 
+const verifyOTP= async function (enteredToken,email){
+  const otp=await redisClient.get(email)
 
+  if(otp!=enteredToken)throw Error("Wrong OTP")
+  return ;
+}
 exports.register = async (req, res) => {
   const { name, email, password, role, specialty } = req.body;
   try {
@@ -36,13 +41,11 @@ exports.register = async (req, res) => {
 exports.verify= async (req,res)=>{
     try {
       const {name, email, password, role, specialty,enteredToken}=req.body
-      const otp=await redisClient.get(email)
-
-      if(otp!=enteredToken)res.status(401).json({message:"Wrong token"})
+      await verifyOTP(enteredToken,email)
       const hashedPassword = await bcrypt.hash(password, 10);
       const user = new User({ name, email, password: hashedPassword, role, specialty });
       await user.save();
-  
+      await redisClient.del(email);
       res.status(201).json({ message: "User registered successfully", user });
   } catch (error) {
       console.log(error)
@@ -101,3 +104,41 @@ exports.login = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+exports.forgotpassoword=async (req,res)=>{
+  const {email,name}=req.body
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      console.error("User not found for email:", email);
+      return res.status(404).json({ message: "No such email exists" });
+    }
+    const token = createOTP()
+    const otp=await generateEmail(name,email,token,tokenTime)
+    await redisClient.set(email,token,'EX',tokenTime*60)
+    console.log(otp);
+    res.json({message:`Email sent to ${email} , please verify the token`})
+  } catch (error) {
+    console.error("Error during login:", error);
+    res.status(500).json({ error: error.message });
+  }
+}
+exports.resetpassword=async(req,res)=>{
+  const {email,enteredToken,password}=req.body
+  try {
+    await verifyOTP(enteredToken,email)
+    const user = await User.findOne({ email });
+    if (!user) {
+      console.error("User not found for email:", email);
+      return res.status(404).json({ message: "No such email exists" });
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user.password = hashedPassword;
+    await user.save();
+    await redisClient.del(email);
+    res.json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Error during login:", error);
+    res.status(500).json({ error: error.message });
+  }
+}
