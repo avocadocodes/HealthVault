@@ -11,6 +11,7 @@ const calendarRoutes = require("./routes/calendarRoutes");
 const userRoutes = require("./routes/usersRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const appointmentRoutes = require("./routes/appointmentRoutes");
+const financeRoutes = require("./routes/financeRoutes");
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.use("/api/calendar-events", calendarRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/appointments", appointmentRoutes);
+app.use("/api/finance", financeRoutes);
 
 const PORT = process.env.PORT || 5000;
 

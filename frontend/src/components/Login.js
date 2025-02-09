@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion"; // For animations
-
-// Background image
+import { motion } from "framer-motion"; 
 import LoginBackground from "../images/login.png";
 
 const Login = ({ onLogin }) => {

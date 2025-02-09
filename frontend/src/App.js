@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import Home from "./components/Home";
 import Login from "./components/Login";
 import Dashboard from "./components/Dashboard";
-import RegisterPatient from "./components/RegisterPatient";
+// import RegisterPatient from "./components/RegisterPatient";
 import RegisterUser from "./components/RegisterUser";
 import { ToastContainer } from "react-toastify";
 import EditPatient from "./components/EditPatient";
@@ -47,7 +47,7 @@ const App = () => {
             path="/login"
             element={<Login onLogin={handleLogin} />}
           />
-          <Route path="/register-patient" element={<RegisterPatient />} />
+          {/* <Route path="/register-patient" element={<RegisterPatient />} /> */}
           <Route path="/register-user" element={<RegisterUser />} />
 
           {/* Protected Routes for Doctors */}

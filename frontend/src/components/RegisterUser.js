@@ -9,7 +9,7 @@ const RegisterUser = () => {
     name: "",
     email: "",
     password: "",
-    role: "doctor", // Default role
+    role: "doctor", 
     specialty: "",
   });
   const [message, setMessage] = useState("");
