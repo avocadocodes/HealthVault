@@ -68,12 +68,17 @@ const Dashboard = () => {
         }
       );
       console.log("Fetched Appointments:", response.data);
-      const appointmentsData = response.data.appointments || [];
+      // const appointmentsData = response.data.appointments || [];
 
-      setAppointments(appointmentsData);
-      setTimeout(() => {
-        console.log("Updated Appointments State:", appointments);
-      }, 1000); 
+      // setAppointments(response.data || []);
+      const filteredAppointments = response.data.filter(
+        (appointment) => appointment.status !== "completed"
+      );
+  
+      setAppointments(filteredAppointments);
+      // setTimeout(() => {
+      //   console.log("Updated Appointments State:", appointments);
+      // }, 1000); 
     } catch (err) {
       console.error("Failed to fetch appointments:", err);
     }
@@ -306,7 +311,7 @@ const Dashboard = () => {
         
                   }}
                 >
-                  Appointments
+                  Upcoming Appointments
                 </button>
               </div>
             )}
@@ -452,7 +457,7 @@ const Dashboard = () => {
            )}
           {activePage === "/appointments" && (
               <div>
-                <h3 className="text-xl font-bold mb-4">Appointments</h3>
+                <h3 className="text-xl font-bold mb-4">Upcoming Appointments</h3>
                 {appointments && appointments.length > 0 ? (
                   appointments.map((appointment) => (
                     <div

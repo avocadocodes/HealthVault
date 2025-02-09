@@ -4,7 +4,7 @@ const getAppointments = async (req, res) => {
   try {
     // console.log("Request body:", req.body); 
     // console.log("Decoded user:", req.user);
-    const appointments = await Appointment.find({ doctorId: req.user.id });
+    const appointments = await Appointment.find({ doctorId: req.user.id, status: "upcoming" });
     // const events = appointments.map((appointment) => ({
     //   title: `${appointment.patientName} - ${appointment.healthIssue}`,
     //   start: new Date(appointment.date + "T" + appointment.time),
@@ -62,10 +62,10 @@ const getPatientAppointments = async (req, res) => {
       patientId,
       status: "upcoming",
     }).populate("doctorId", "name");
-    // const completedAppointments = await Appointment.find({
-    //   patientId,
-    //   status: "completed",
-    // }).populate("doctorId", "name");
+    const completedAppointments = await Appointment.find({
+      patientId,
+      status: "completed",
+    }).populate("doctorId", "name");
 
     res.status(200).json({ upcomingAppointments, completedAppointments });
   } catch (err) {

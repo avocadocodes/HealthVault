@@ -60,7 +60,7 @@ const Home = () => {
     if (role === "patient") {
       navigate("/patient-dashboard");
     } else if (role === "doctor") {
-      navigate("/doctor-dashboard");
+      navigate("/dashboard");
     } else {
       toast.error("Role not recognized");
     }
