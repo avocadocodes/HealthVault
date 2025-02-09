@@ -11,12 +11,12 @@ const bookingRequestSchema = new mongoose.Schema({
   },
   doctorId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User", // Assuming doctors are stored in the User model
+    ref: "User", 
     required: true,
   },
   patientId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User", // Assuming patients are stored in the User model
+    ref: "User", 
     required: true,
   },
   date: {

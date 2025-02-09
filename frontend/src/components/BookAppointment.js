@@ -12,6 +12,7 @@ const BookAppointment = () => {
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  
   const navigate = useNavigate();
 
   const handleInputChange = (e) => {

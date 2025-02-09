@@ -14,6 +14,7 @@ const RegisterUser = () => {
   });
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  
   const navigate = useNavigate();
 
   const handleInputChange = (e) => {
@@ -36,7 +37,7 @@ const RegisterUser = () => {
         }
       );
       setMessage("User registered successfully!");
-      setTimeout(() => navigate("/login"), 2000); // Redirect to login after 2 seconds
+      setTimeout(() => navigate("/login"), 2000); 
     } catch (err) {
       setError(err.response?.data?.message || "Registration failed.");
     }
@@ -57,7 +58,7 @@ const RegisterUser = () => {
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{
-              backgroundImage: `url(${SignUpBackground})`, // Replace with your image path
+              backgroundImage: `url(${SignUpBackground})`, 
             }}
           ></div>
           <div className="absolute inset-0 bg-black opacity-50"></div>

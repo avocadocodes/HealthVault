@@ -1,14 +1,9 @@
-/* index.css */
-
-/* Default transitions for smooth theme change */
 body {
     margin: 2px;
     padding: 100;
     font-family: Arial, sans-serif;
     transition: background-color 0.3s, color 0.3s;
   }
-  
-  /* Dark theme */
   .bg-gray-900 {
     background-color: #000000;
   }
@@ -16,8 +11,6 @@ body {
   .text-white {
     color: #ffffff;
   }
-  
-  /* Light theme */
   .bg-white {
     background-color: #ffffff;
   }

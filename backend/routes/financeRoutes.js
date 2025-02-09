@@ -4,7 +4,6 @@ const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-
 router.get("/payments", authMiddleware, getPayments);
 router.post("/payments", authMiddleware, addPayment);
 router.get("/pending-payments", authMiddleware, getPendingPayments); 

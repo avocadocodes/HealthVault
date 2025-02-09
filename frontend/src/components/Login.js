@@ -8,6 +8,7 @@ const Login = ({ onLogin }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
+
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -18,7 +19,6 @@ const Login = ({ onLogin }) => {
         { email, password }
       );
       const { token, user } = response.data;
-
       onLogin(token, user.role);
       navigate(user.role === "doctor" ? "/dashboard" : "/patient-dashboard");
     } catch (err) {
@@ -41,7 +41,7 @@ const Login = ({ onLogin }) => {
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{
-              backgroundImage: `url(${LoginBackground})`, // Replace with your image path
+              backgroundImage: `url(${LoginBackground})`, 
             }}
           ></div>
           <div className="absolute inset-0 bg-black opacity-50"></div>

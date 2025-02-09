@@ -4,10 +4,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import Home from "./components/Home";
 import Login from "./components/Login";
 import Dashboard from "./components/Dashboard";
-// import RegisterPatient from "./components/RegisterPatient";
 import RegisterUser from "./components/RegisterUser";
 import { ToastContainer } from "react-toastify";
-// import EditPatient from "./components/EditPatient";
 import PatientDetails from "./components/PatientDetails";
 import PatientDashboard from "./components/PatientDashboard";
 import BookAppointment from "./components/BookAppointment";
@@ -41,37 +39,26 @@ const App = () => {
     <ThemeProvider>
       <Router>
         <Routes>
-          {/* Public Routes */}
           <Route path="/" element={<Home />} />
           <Route
             path="/login"
             element={<Login onLogin={handleLogin} />}
           />
-          {/* <Route path="/register-patient" element={<RegisterPatient />} /> */}
           <Route path="/register-user" element={<RegisterUser />} />
-
-          {/* Protected Routes for Doctors */}
           {token && role === "doctor" ? (
             <Route path="/dashboard" element={<Dashboard />} />
           ) : (
             <Route path="/dashboard" element={<Navigate to="/login" />} />
           )}
-
-          {/* Protected Routes for Patients */}
           {token && role === "patient" ? (
             <Route path="/patient-dashboard" element={<PatientDashboard />} />
           ) : (
             <Route path="/patient-dashboard" element={<Navigate to="/login" />} />
           )}
-
-          {/* Additional Routes */}
-          {/* <Route path="/patients/edit/:id" element={<EditPatient />} /> */}
           <Route path="/patients/:id/stats" element={<PatientDetails />} />
           <Route path="/book-appointment/:doctorId" element={<BookAppointment />} />
           <Route path="/patient-appointments" element={<PatientAppointments />} />
-
           <Route path="/" element={<Home isLoggedIn={!!token} onLogout={handleLogout} />} />
-
         </Routes>
         <ToastContainer />
       </Router>

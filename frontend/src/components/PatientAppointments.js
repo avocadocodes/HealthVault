@@ -10,7 +10,7 @@ const PatientAppointments = () => {
       try {
         const token = localStorage.getItem("token");
         const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/appointments`, // Fetch appointments for the patient
+          `${process.env.REACT_APP_API_URL}/appointments`, 
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -45,7 +45,7 @@ const PatientAppointments = () => {
               <strong>Time:</strong> {appointment.time}
             </p>
             <p>
-              <strong>Doctor:</strong> {appointment.doctorId?.name || "N/A"} {/* Fetch doctor's name */}
+              <strong>Doctor:</strong> {appointment.doctorId?.name || "N/A"} 
             </p>
             <p>
               <strong>Health Issue:</strong> {appointment.healthIssue}

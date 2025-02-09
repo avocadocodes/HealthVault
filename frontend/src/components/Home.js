@@ -10,7 +10,6 @@ import HeroImageWhite from "../images/herowhite.png";
 import { useTheme } from "../context/ThemeContext";
 import { FaMoon, FaSun, FaSignOutAlt,FaUserPlus, FaTachometerAlt, FaSignInAlt, FaBookOpen } from "react-icons/fa";
 
-// Custom Arrow Component
 const CustomArrow = ({ direction, onClick }) => {
   return (
     <div
@@ -20,9 +19,9 @@ const CustomArrow = ({ direction, onClick }) => {
       onClick={onClick}
     >
       {direction === "left" ? (
-        <span>&#8592;</span> // Left Arrow (←)
+        <span>&#8592;</span> 
       ) : (
-        <span>&#8594;</span> // Right Arrow (→)
+        <span>&#8594;</span> 
       )}
     </div>
   );
@@ -45,15 +44,16 @@ const Home = () => {
   const navigate = useNavigate();
   useEffect(() => {
     AOS.init({
-      duration: 1000, // Animation duration in milliseconds
-      offset: 200, // Trigger animation 200px before the element is in view
-      once: true, // Whether animation should happen only once
+      duration: 1000, 
+      offset: 200, 
+      once: true, 
     });
     const userRole = localStorage.getItem("role");
     if (isLoggedIn && userRole) {
       setRole(userRole);
     }
   }, [isLoggedIn]);
+
   const handleDashboardRedirect = () => {
     if (role === "patient") {
       navigate("/patient-dashboard");
@@ -68,17 +68,17 @@ const Home = () => {
     { title: "Nutrition & Diet", description: "Learn about balanced diets and nutrition.", url: "https://nutritionfacts.org/blog/" },
     { title: "Mental Wellbeing", description: "Mental health strategies for a balanced life.", url: "https://www.nhs.uk/mental-health/self-help/guides-tools-and-activities/five-steps-to-mental-wellbeing/" },
   ];
-  // Carousel settings with arrows
+ 
   const settings = {
-    dots: true, // Show navigation dots
-    infinite: true, // Infinite loop
-    speed: 500, // Transition speed in ms
-    slidesToShow: 3, // Number of slides visible
-    slidesToScroll: 1, // Number of slides to scroll
-    autoplay: true, // Enable autoplay
-    autoplaySpeed: 2000, // Time interval for auto-scroll in ms
-    nextArrow: <CustomArrow direction="right" />, // Custom right arrow
-    prevArrow: <CustomArrow direction="left" />, // Custom left arrow
+    dots: true, 
+    infinite: true, 
+    speed: 500, 
+    slidesToShow: 3, 
+    slidesToScroll: 1, 
+    autoplay: true, 
+    autoplaySpeed: 2000, 
+    nextArrow: <CustomArrow direction="right" />, 
+    prevArrow: <CustomArrow direction="left" />, 
     responsive: [
       {
         breakpoint: 1024, // Tablet view
@@ -95,7 +95,6 @@ const Home = () => {
     ],
   };
 
-  // Services data
   const services = [
     {
       title: "Track Patient Stats",
@@ -107,21 +106,11 @@ const Home = () => {
       description:
         "Admins can oversee doctors, manage their profiles, and track activities efficiently.",
     },
-    // {
-    //   title: "Centralized Data",
-    //   description:
-    //     "Secure and centralized storage of all healthcare data for easy access and management.",
-    // },
     {
       title: "Role-Based Access",
       description:
         "Each user gets specific permissions to access data based on their role.",
     },
-    // {
-    //   title: "Real-Time Monitoring",
-    //   description:
-    //     "Track patient vitals and health metrics in real-time for better care.",
-    // },
     {
       title: "Analytics Dashboard",
       description:
@@ -131,8 +120,8 @@ const Home = () => {
 
   return (
     <div className={`min-h-screen ${theme === "dark" ? "bg-black text-white" : "bg-white text-black"}`}>
+
       {/* Navbar */}
-      
       <div className={`flex justify-between items-center p-6 ${theme === "dark" ? "text-white" : " text-black"}`}>
         <div className="text-2xl font-bold">HealthVault</div>
         <div className="flex space-x-6">
@@ -189,8 +178,7 @@ const Home = () => {
       </div>
 
       {/* Hero Section */}
-    
-      <section
+       <section
         className="relative text-center py-40 bg-cover bg-center text-white"
         style={{
           backgroundImage: `url(${
@@ -198,10 +186,6 @@ const Home = () => {
           })`, 
         }}
       >
-        {/* Black Translucent Overlay */}
-        {/* <div className="absolute inset-0 bg-black bg-opacity-60"></div> */}
-
-        {/* Content Above the Overlay */}
         <div className="relative z-10">
           <h1 className={`text-4xl font-bold mb-4 ${theme === "dark" ? "text-white" : " text-black"}`}>Your Health. Our Priority.</h1>
           <p className={`text-lg mb-6 ${theme === "dark" ? "text-white" : " text-black"}`}>
@@ -216,7 +200,6 @@ const Home = () => {
           </button>
         </div>
       </section>
-
 
       {/* Services Section */}
       <section className="py-20 flex-row space-x-6" data-aos="fade-up">
@@ -249,54 +232,49 @@ const Home = () => {
           ))}
         </div>
       </section>
+
       {/* Contact Us Section */}
       <section
         className="relative p-12 bg-cover bg-center text-white"
         data-aos="fade-up"
-        // style={{
-        //   backgroundImage: `url(${ContactImage})`, // Replace with your contact section image path
-        // }}
+       
       >
-  {/* Black Translucent Overlay */}
-  {/* <div className="absolute inset-0 bg-black bg-opacity-60"></div> */}
-
-  {/* Content Above the Overlay */}
-  <div className="relative z-10 max-w-xl mx-auto">
-    <h2 className={`text-3xl font-bold text-center mb-6 ${theme === "dark" ? " text-white" : "text-black"}`}>Have questions?</h2>
-    <p className={`text-center ${theme === "dark" ? " text-white" : "text-black"} mb-8`}>
-      Complete this form and we will get back to you in 24 hours.
-    </p>
-    <form>
-      <input
-        type="text"
-        placeholder="Full Name"
-        className="block w-full p-3 mb-4 border border-gray-300 rounded"
-      />
-      <input
-        type="email"
-        placeholder="Email Address"
-        className="block w-full p-3 mb-4 border border-gray-300 rounded"
-      />
-      <textarea
-        placeholder="Message"
-        className="block w-full p-3 mb-4 border border-gray-300 rounded"
-        rows="4"
-      ></textarea>
-      <div className="flex items-center space-x-2 mb-6">
-        <input type="checkbox" className="h-4 w-4" />
-        <label className={`${theme === "dark" ? " text-white" : "text-black"}`}>
-          I agree to the Terms and Conditions
-        </label>
-      </div>
-      <button
-        type="submit"
-        className="w-full bg-gray-600 text-white py-3 rounded hover:bg-gray-700"
-      >
-        Send Message
-      </button>
-    </form>
-  </div>
-</section>
+        <div className="relative z-10 max-w-xl mx-auto">
+          <h2 className={`text-3xl font-bold text-center mb-6 ${theme === "dark" ? " text-white" : "text-black"}`}>Have questions?</h2>
+          <p className={`text-center ${theme === "dark" ? " text-white" : "text-black"} mb-8`}>
+            Complete this form and we will get back to you in 24 hours.
+          </p>
+          <form>
+            <input
+              type="text"
+              placeholder="Full Name"
+              className="block w-full p-3 mb-4 border border-gray-300 rounded"
+            />
+            <input
+              type="email"
+              placeholder="Email Address"
+              className="block w-full p-3 mb-4 border border-gray-300 rounded"
+            />
+            <textarea
+              placeholder="Message"
+              className="block w-full p-3 mb-4 border border-gray-300 rounded"
+              rows="4"
+            ></textarea>
+            <div className="flex items-center space-x-2 mb-6">
+              <input type="checkbox" className="h-4 w-4" />
+              <label className={`${theme === "dark" ? " text-white" : "text-black"}`}>
+                I agree to the Terms and Conditions
+              </label>
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-gray-600 text-white py-3 rounded hover:bg-gray-700"
+            >
+              Send Message
+            </button>
+          </form>
+        </div>
+      </section>
 
       {/* Footer */}
       <footer className={`${theme === "dark" ? "bg-black text-white" : "bg-white text-black"} py-8`}>
@@ -304,6 +282,7 @@ const Home = () => {
           © 2025 HealthVault. All rights reserved.
         </div>
       </footer>
+      
     </div>
   );
 };

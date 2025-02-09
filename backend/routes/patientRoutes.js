@@ -1,4 +1,3 @@
-
 const express = require("express");
 const {
     getPatients,
@@ -17,7 +16,6 @@ router.post("/", createPatient);
 router.put("/:id", updatePatient);
 router.delete("/:id", deletePatient);
 router.get("/stats", getPatientStats);
-
 
 module.exports = router;
                 

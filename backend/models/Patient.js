@@ -9,7 +9,6 @@ const patientSchema = mongoose.Schema({
   issue: { type: String, required: true },
   medicines: { type: String, required: true },
   status: { type: String, required: true },
-  // healthData: [{ type: mongoose.Schema.Types.ObjectId, ref: "HealthData" }],
 }, { timestamps: true });
 
 module.exports = mongoose.model("Patient", patientSchema);

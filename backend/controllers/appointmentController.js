@@ -2,14 +2,7 @@ const Appointment = require("../models/Appointment");
 
 const getAppointments = async (req, res) => {
   try {
-    // console.log("Request body:", req.body); 
-    // console.log("Decoded user:", req.user);
     const appointments = await Appointment.find({ doctorId: req.user.id, status: "upcoming" });
-    // const events = appointments.map((appointment) => ({
-    //   title: `${appointment.patientName} - ${appointment.healthIssue}`,
-    //   start: new Date(appointment.date + "T" + appointment.time),
-    //   end: new Date(appointment.date + "T" + appointment.time),
-    // }));
     res.status(200).json(appointments);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch appointments." });
@@ -22,7 +15,6 @@ const createAppointment = async (req, res) => {
     if (!patientName || !healthIssue || !date || !time) {
       return res.status(400).json({ error: "All fields are required" });
     }
-
     const appointment = new Appointment({
       doctorId: req.user.id,
       patientName,
@@ -30,9 +22,7 @@ const createAppointment = async (req, res) => {
       date,
       time,
     });
-
     await appointment.save();
-
     res.status(201).json({ appointment });
   } catch (err) {
     console.error("Error creating appointment:", err);
@@ -43,11 +33,9 @@ const createAppointment = async (req, res) => {
   try {
     const appointmentId = req.params.id;
     const deletedAppointment = await Appointment.findByIdAndDelete(appointmentId);
-
     if (!deletedAppointment) {
       return res.status(404).json({ error: "Appointment not found" });
     }
-
     res.status(200).json({ message: "Appointment deleted successfully" });
   } catch (err) {
     console.error("Error deleting appointment:", err);
@@ -66,7 +54,6 @@ const getPatientAppointments = async (req, res) => {
       patientId,
       status: "completed",
     }).populate("doctorId", "name");
-
     res.status(200).json({ upcomingAppointments, completedAppointments });
   } catch (err) {
     console.error("Error fetching patient appointments:", err);
@@ -82,10 +69,8 @@ const markAppointmentAsVisited = async (req, res) => {
     if (!appointment) {
       return res.status(404).json({ error: "Appointment not found" });
     }
-
     appointment.status = "completed";
     await appointment.save();
-
     res.status(200).json({ message: "Appointment marked as visited", appointment });
   } catch (err) {
     console.error("Error marking appointment as visited:", err);

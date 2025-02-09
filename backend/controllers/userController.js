@@ -2,8 +2,6 @@ const User = require("../models/User");
 exports.getDoctors = async (req, res) => {
   try {
     const { name, specialty } = req.query;
-
-    
     const query = {};
     if (name) {
       query.name = { $regex: name, $options: "i" }; 
@@ -11,8 +9,6 @@ exports.getDoctors = async (req, res) => {
     if (specialty) {
       query.specialty = { $regex: specialty, $options: "i" }; 
     }
-
-   
     const doctors = await User.find({ role: "doctor", ...query });
     res.status(200).json(doctors);
   } catch (error) {
@@ -22,13 +18,11 @@ exports.getDoctors = async (req, res) => {
 };
 exports.getUserDetails = async (req, res) => {
   try {
-    const userId = req.user._id; // Assuming `req.user` contains the logged-in user's ID
+    const userId = req.user._id; 
     const user = await User.findById(userId);
-
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-
     res.status(200).json(user);
   } catch (error) {
     console.error("Error fetching user details:", error);
