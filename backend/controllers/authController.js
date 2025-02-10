@@ -1,16 +1,15 @@
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
 const redisClient= require("../utils/redisClient")
 const generateEmail= require("../utils/sendEmail")
 const createOTP= require("../utils/createOTP.js")
 
 const tokenTime=2
 
-const verifyOTP= async function (enteredToken,email){
+const verifyOTP= async function (enteredOtp,email){
   const otp=await redisClient.get(email)
 
-  if(otp!=enteredToken)throw Error("Wrong OTP")
+  if(otp!=enteredOtp)throw Error("Wrong OTP")
   return ;
 }
 exports.register = async (req, res) => {
@@ -38,11 +37,12 @@ exports.verify= async (req,res)=>{
       const hashedPassword = await bcrypt.hash(password, 10);
       const user = new User({ name, email, password: hashedPassword, role, specialty });
       await user.save();
+      console.log(user)
       await redisClient.del(email);
       res.status(201).json({ message: "User registered successfully", user });
   } catch (error) {
       console.log(error)
-      res.json({error:error.message})
+      res.json({error:error.message}).status(404)
   }
 }
 
@@ -66,7 +66,12 @@ exports.login = async (req, res) => {
     console.log("JWT_SECRET used for signing:", process.env.JWT_SECRET);
     const token=await user.getAccessToken()
     console.log("Login successful, token generated for:", email);
-    res.status(200).json({
+    res.status(200).cookie("token",token,{
+      expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+      sameSite:"lax",
+      httpOnly:true,
+      secure:process.env.NODE_ENV === "production"
+      }).json({
       token,
       user: {
         id: user._id,
@@ -74,12 +79,7 @@ exports.login = async (req, res) => {
         email: user.email,
         role: user.role,
       },
-    }).cookie("token",token,{
-      expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
-      sameSite:"lax",
-      httpOnly:true,
-      secure:true
-      });
+    })
   } catch (error) {
     console.error("Error during login:", error);
     res.status(500).json({ error: error.message });

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-function OTPComponent() {
+function OTPComponent({name, email, password, role, specialty}) {
   const [otp, setOtp] = useState(""); // OTP Input
   const navigate = useNavigate();
 
@@ -16,10 +16,13 @@ function OTPComponent() {
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/auth/verify`,
-        { "enteredOtp": otp }
+        { 
+          "enteredOtp": otp ,
+          name,email,password,role,specialty
+        }
       );
 
-      if (response.status === 200) {
+      if (response.status != 404) {
         navigate("/login");
       } else {
         alert("Wrong OTP");

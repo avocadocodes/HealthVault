@@ -74,7 +74,7 @@ const RegisterUser = () => {
           </motion.div>
             {
               otpScreen?(
-                <OTPComponent/>
+                <OTPComponent name={formData.name} email={formData.email} role={formData.role} password={formData.password} specialty={formData.specialty}/>
               ):
               (
                 <motion.div

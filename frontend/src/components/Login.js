@@ -10,17 +10,17 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/auth/login`,
-        { email, password }
+        { email, password },
+        { withCredentials: true } 
       );
+      if(response.status!=200)throw Error("wrong credentials")
       const { token, user } = response.data;
-      login(token, user.role);
       navigate(user.role === "doctor" ? "/dashboard" : "/patient-dashboard");
     } catch (err) {
       setError(err.response?.data?.message || "Login failed. Try again.");
