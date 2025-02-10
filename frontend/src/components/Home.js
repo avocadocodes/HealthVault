@@ -6,6 +6,7 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 import Cookies from "js-cookie";
 import "slick-carousel/slick/slick.css";
+import { toast } from "react-toastify";
 import "slick-carousel/slick/slick-theme.css";
 import HeroImageBlack from "../images/heroblack.png";
 import HeroImageWhite from "../images/herowhite.png";
@@ -39,15 +40,29 @@ const Home = () => {
   
   const navigate = useNavigate();
 
-  const handleDashboardRedirect = () => {
-    if (!document.cookie.includes("token=")) {
-      toast.error("You need to log in first");
+  const handleDashboardRedirect = async () => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/users/me`, // Ensure this endpoint exists
+        { withCredentials: true }
+      );
+      
+      const userRole = response.data.role;
+  
+      if (!userRole) {
+        toast.error("User role not found. Please log in again.");
+        navigate("/login");
+        return;
+      }
+  
+      navigate(userRole === "patient" ? "/patient-dashboard" : "/dashboard");
+    } catch (error) {
+      console.error("Failed to fetch user role:", error);
+      toast.error("Session expired. Please log in again.");
       navigate("/login");
-      return;
     }
-    
-    navigate(role === "patient" ? "/patient-dashboard" : "/dashboard");    
   };
+  
   const blogs = [
     { title: "Healthy Living Tips", description: "Discover ways to maintain a healthy lifestyle.", url: "https://www.healthline.com/health/how-to-maintain-a-healthy-lifestyle" },
     { title: "Nutrition & Diet", description: "Learn about balanced diets and nutrition.", url: "https://nutritionfacts.org/blog/" },

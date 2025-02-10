@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 
 exports.getPayments = async (req, res) => {
   try {
-    const token = req.headers.authorization.split(" ")[1];
+    const token = req.cookies.token;
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const payments = await Payment.find({ user: decoded.id });
     res.status(200).json(payments);
@@ -22,7 +22,7 @@ exports.addPayment = async (req, res) => {
     if (paymentStatus === "Completed" && (!type || !transactionId)) {
       return res.status(400).json({ error: "Payment Type and Transaction ID are required for completed payments" });
     }
-    const token = req.headers.authorization.split(" ")[1];
+    const token = req.cookies.token;
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const newPayment = new Payment({
       user: decoded.id,
@@ -43,7 +43,7 @@ exports.addPayment = async (req, res) => {
 
 exports.getPendingPayments = async (req, res) => {
   try {
-    const token = req.headers.authorization.split(" ")[1];
+    const token = req.cookies.token;
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const pendingPayments = await Payment.find(
       { user: decoded.id, paymentStatus: "Pending"}, 

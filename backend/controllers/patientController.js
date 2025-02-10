@@ -3,10 +3,10 @@ const Patient = require("../models/Patient");
 
 exports.createPatient = async (req, res) => {
   try {
-    if (!req.headers.authorization) {
-      return res.status(401).json({ error: "Authorization header missing" });
+    const token = req.cookies.token;
+    if (!token) {
+      return res.status(401).json({ error: "Please login first" });
     }
-    const token = req.headers.authorization.split(" ")[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.body.user = decoded.id; 
     const patient = new Patient(req.body);
@@ -20,10 +20,10 @@ exports.createPatient = async (req, res) => {
 
 exports.getPatients = async (req, res) => {
   try {
-    if (!req.headers.authorization) {
-      return res.status(401).json({ error: "Authorization header missing" });
+    const token = req.cookies.token;
+    if (!token) {
+      return res.status(401).json({ error: "Please login first" });
     }
-    const token = req.headers.authorization.split(" ")[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET); 
     const patients = await Patient.find({ user: decoded.id });
     res.status(200).json(patients);
@@ -34,10 +34,10 @@ exports.getPatients = async (req, res) => {
 
 exports.updatePatient = async (req, res) => {
   try {
-    if (!req.headers.authorization) {
-      return res.status(401).json({ error: "Authorization header missing" });
+    const token = req.cookies.token;
+    if (!token) {
+      return res.status(401).json({ error: "Please login first" });
     }
-    const token = req.headers.authorization.split(" ")[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET); 
     const patient = await Patient.findById(req.params.id);
     if (!patient) {
@@ -58,10 +58,10 @@ exports.updatePatient = async (req, res) => {
 
 exports.deletePatient = async (req, res) => {
   try {
-    if (!req.headers.authorization) {
-      return res.status(401).json({ error: "Authorization header missing" });
+    const token = req.cookies.token;
+    if (!token) {
+      return res.status(401).json({ error: "Please login first" });
     }
-    const token = req.headers.authorization.split(" ")[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET); 
     const patient = await Patient.findById(req.params.id);
     if (!patient) {

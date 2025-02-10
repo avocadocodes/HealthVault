@@ -769,7 +769,7 @@ import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 // import { useAuth } from "../context/authContext";
 import { dateFnsLocalizer } from "react-big-calendar";
-import Cookies from "js-cookie";
+// import Cookies from "js-cookie";
 import format from "date-fns/format";
 import parse from "date-fns/parse";
 import startOfWeek from "date-fns/startOfWeek";
@@ -832,18 +832,19 @@ const Dashboard = () => {
   };
   const navigate = useNavigate();
   // const { logout } = useAuth();
-  function getCookie(name) {
-    const cookies = document.cookie.split("; ");
-    for (let cookie of cookies) {
-        const [key, value] = cookie.split("=");
-        if (key === name) {
-            return value;
-        }
-    }
-    return null; // Return null if cookie not found
-  }
+  // function getCookie(name) {
+  //   const cookies = document.cookie.split("; ");
+  //   for (let cookie of cookies) {
+  //       const [key, value] = cookie.split("=");
+  //       if (key === name) {
+  //           return value;
+  //       }
+  //   }
+  //   return null; // Return null if cookie not found
+  // }
   const fetchDoctorDetails = async () => {
     try {
+      // const token = Cookies.get("token"); 
       const response = await axios.get(
         `${process.env.REACT_APP_API_URL}/users/me`,
         { withCredentials: true } 
@@ -861,7 +862,7 @@ const Dashboard = () => {
       const response = await axios.get(
         `${process.env.REACT_APP_API_URL}/appointments`,
         {
-          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
         }
       );
       console.log("Fetched Appointments:", response.data);
@@ -895,7 +896,7 @@ const Dashboard = () => {
           time: newAppointment.time,
         },
         {
-          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
         }
       );
   
@@ -917,7 +918,7 @@ const Dashboard = () => {
         `${process.env.REACT_APP_API_URL}/booking-requests/${id}/${action}`,
         {},
         {
-          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
         }
       );
   
@@ -941,7 +942,7 @@ const Dashboard = () => {
       await axios.delete(
         `${process.env.REACT_APP_API_URL}/appointments/${appointmentId}`,
         {
-          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
         }
       );
       setAppointments((prevAppointments) =>
@@ -958,7 +959,7 @@ const Dashboard = () => {
       await axios.put(
         `${process.env.REACT_APP_API_URL}/appointments/${appointmentId}/visited`,
         {},
-        { headers: { Authorization: `Bearer ${token}` } }
+        { withCredentials: true }
       );
   
       setAppointments((prevAppointments) =>
@@ -979,13 +980,15 @@ const Dashboard = () => {
   
     try {
       console.log("Adding patient:", newPatient);
-  
+
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/patients`,
         newPatient,
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          withCredentials: true, 
+        }
       );
-  
+
       if (response.data) {
         setPatients((prev) => [...prev, response.data.patient]); // Add to state
         toast.success("Patient added successfully!");
@@ -997,13 +1000,14 @@ const Dashboard = () => {
       console.error("Failed to add patient:", err);
       toast.error("Failed to add patient.");
     }
-  };
+};
+
   const fetchPatients = async () => {
     try {
       console.log("Fetching patient data...");
       const response = await axios.get(
         `${process.env.REACT_APP_API_URL}/patients`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        {withCredentials: true }
       );
       console.log("Fetched Patients:", response.data);
       if (Array.isArray(response.data)) {
@@ -1029,7 +1033,7 @@ const Dashboard = () => {
       const response = await axios.put(
         `${process.env.REACT_APP_API_URL}/patients/${editingPatient._id}`,
         editingPatient,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { withCredentials: true}
       );
   
       console.log("Updated Patient Response:", response.data); // ✅ Debugging
@@ -1055,7 +1059,7 @@ const Dashboard = () => {
     try {
       await axios.delete(
         `${process.env.REACT_APP_API_URL}/patients/${patientId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { withCredentials: true }
       );
   
       setPatients((prevPatients) =>
@@ -1072,7 +1076,7 @@ const Dashboard = () => {
     try {
       const response = await axios.get(
         `${process.env.REACT_APP_API_URL}/finance/payments`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { withCredentials: true }
       );
   
       console.log("Fetched Payments:", response.data);
@@ -1103,7 +1107,7 @@ const Dashboard = () => {
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/finance/payments`,
         formattedPayment,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { withCredentials: true}
       );
   
       if (response.data.payment) {
@@ -1130,7 +1134,7 @@ const Dashboard = () => {
     try {
       const response = await axios.get(
         `${process.env.REACT_APP_API_URL}/finance/pending-payments`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { withCredentials: true }
       );
   
       console.log("Fetched Pending Payments:", response.data);
@@ -1149,7 +1153,7 @@ const Dashboard = () => {
       await axios.put(
         `${process.env.REACT_APP_API_URL}/finance/complete-payment/${selectedPayment._id}`,
         paymentDetails,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { withCredentials: true}
       );
   
       toast.success("Payment marked as completed!");
@@ -1163,100 +1167,97 @@ const Dashboard = () => {
   };
   
   
-  // useEffect(() => {
-  //   const token = Cookies.get("token");
-  //   console.log(token)
-  //   if (activePage === "/patient-list") {
-  //     fetchPatients();
-  //   }
-  // }, [activePage]);
+  useEffect(() => {
+    // const token = Cookies.get("token");
+    // console.log(token)
+    if (activePage === "/patient-list") {
+      fetchPatients();
+    }
+  }, [activePage]);
   
-  // useEffect(() => {
-  //   if (activePage === "/appointments") {
-  //     fetchAppointments(); 
-  //   }
-  // }, [activePage]); 
+  useEffect(() => {
+    if (activePage === "/appointments") {
+      fetchAppointments(); 
+    }
+  }, [activePage]); 
 
   useEffect(() => {
     fetchDoctorDetails(); 
   }, []);
 
-  // useEffect(() => {
-  //   const fetchDashboardData = async () => {
-  //     try {
-  //       if (!token) {
-  //         toast.error("Authentication required. Redirecting to login.");
-  //         navigate("/login");
-  //         return;
-  //       }
-  //       const patientsResponse = await axios.get(
-  //         `${process.env.REACT_APP_API_URL}/patients`,
-  //         {
-  //           headers: { Authorization: `Bearer ${token}` },
-  //         }
-  //       );
-  //       setPatients(patientsResponse.data);
+  useEffect(() => {
 
-  //       await fetchAppointments();
-  //       const appointmentsResponse = await axios.get(
-  //         `${process.env.REACT_APP_API_URL}/appointments`,
-  //         { headers: { Authorization: `Bearer ${token}` } }
-  //       );
-  //       console.log("Fetched Appointments:", appointmentsResponse.data);
-  //       setAppointments(appointmentsResponse.data);
-  //       const bookingResponse = await axios.get(
-  //         `${process.env.REACT_APP_API_URL}/booking-requests`,
-  //         {
-  //           headers: { Authorization: `Bearer ${token}` },
-  //         }
-  //       );
-  //       console.log("Booking Requests:", bookingRequests);
-  //       setBookingRequests(bookingResponse.data);
-  //     } catch (err) {
-  //       console.error(err);
-  //       setError(err.response?.data?.message || "Failed to fetch dashboard data.");
-  //     }
-  //   };
+    // const token = Cookies.get("token");
+    const fetchDashboardData = async () => {
+      try {
+        const patientsResponse = await axios.get(
+          `${process.env.REACT_APP_API_URL}/patients`,
+          {
+            withCredentials: true,
+          }
+        );
+        setPatients(patientsResponse.data);
 
-  //   fetchDashboardData();
-  // }, []);
+        await fetchAppointments();
+        const appointmentsResponse = await axios.get(
+          `${process.env.REACT_APP_API_URL}/appointments`,
+          { withCredentials: true }
+        );
+        console.log("Fetched Appointments:", appointmentsResponse.data);
+        setAppointments(appointmentsResponse.data);
+        const bookingResponse = await axios.get(
+          `${process.env.REACT_APP_API_URL}/booking-requests`,
+          {
+            withCredentials: true
+          }
+        );
+        console.log("Booking Requests:", bookingRequests);
+        setBookingRequests(bookingResponse.data);
+      } catch (err) {
+        console.error(err);
+        setError(err.response?.data?.message || "Failed to fetch dashboard data.");
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
   
-  // useEffect(() => {
-  //   const fetchBookingRequests = async () => {
-  //     try {
-  //       const response = await axios.get(
-  //         `${process.env.REACT_APP_API_URL}/booking-requests`,
-  //         {
-  //           headers: { Authorization: `Bearer ${token}` },
-  //         }
-  //       );
-  //       setBookingRequests(response.data); 
-  //     } catch (err) {
-  //       console.error("Failed to fetch booking requests:", err);
-  //     }
-  //   };
+  useEffect(() => {
+    const fetchBookingRequests = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/booking-requests`,
+          {
+            withCredentials: true
+          }
+        );
+        setBookingRequests(response.data); 
+      } catch (err) {
+        console.error("Failed to fetch booking requests:", err);
+      }
+    };
   
-  //   fetchBookingRequests();
-  // }, []);
-  // useEffect(() => {
-  //   document.body.className = theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black";
-  // }, [theme]);
+    fetchBookingRequests();
+  }, []);
+  useEffect(() => {
+    document.body.className = theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black";
+  }, [theme]);
 
-  // useEffect(() => {
-  //   console.log("Re-render triggered, Appointments:", appointments);
-  //   setReload(prev => !prev);
-  // }, [appointments]);
+  useEffect(() => {
+    console.log("Re-render triggered, Appointments:", appointments);
+    setReload(prev => !prev);
+  }, [appointments]);
  
-  // useEffect(() => {
-  //   if (activePage === "/payments") {
-  //     fetchPayments();
-  //   }
-  // }, [activePage]);
-  // useEffect(() => {
-  //   if (activePage === "/pending-payments") {
-  //     fetchPendingPayments();
-  //   }
-  // }, [activePage]);
+  useEffect(() => {
+    if (activePage === "/payments") {
+      fetchPayments();
+    }
+  }, [activePage]);
+  useEffect(() => {
+    if (activePage === "/pending-payments") {
+      fetchPendingPayments();
+    }
+  }, [activePage]);
   
   return (
     <div className={`flex h-screen min-h-screen ${theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black"}`}>

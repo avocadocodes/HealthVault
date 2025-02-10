@@ -21,8 +21,8 @@ const Login = () => {
       );
       
       if(response.status!=200)throw Error("wrong credentials")
-      const { token, user } = response.data;
-      console.log(user.role);
+      const { user } = response.data;
+      // console.log(user.role);
       navigate(user.role === "doctor" ? "/dashboard" : "/patient-dashboard");
       
     } catch (err) {

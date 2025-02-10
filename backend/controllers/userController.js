@@ -19,7 +19,7 @@ exports.getDoctors = async (req, res) => {
 exports.getUserDetails = async (req, res) => {
   try {
     const userId = req.user._id; 
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).select("name email role");
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
