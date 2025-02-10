@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/authContext";
 import { dateFnsLocalizer } from "react-big-calendar";
 import format from "date-fns/format";
 import parse from "date-fns/parse";
@@ -61,7 +62,7 @@ const Dashboard = () => {
     setActiveMenu(activeMenu === menu ? null : menu);
   };
   const navigate = useNavigate();
-
+  const { logout } = useAuth();
   const fetchDoctorDetails = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -77,11 +78,7 @@ const Dashboard = () => {
       toast.error("Failed to fetch doctor details.");
     }
   };
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    navigate("/");
-  };
+
   const fetchAppointments = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -613,7 +610,7 @@ const Dashboard = () => {
             )}
           </button>
           <button
-            onClick={handleLogout}
+            onClick={logout}
             className="p-2 rounded-full hover:bg-gray-700"
           >
             {theme === "light" ? (
