@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function OTPComponent({name, email, password, role, specialty}) {
-  const [otp, setOtp] = useState(""); // OTP Input
+  const [otp, setOtp] = useState(""); 
   const navigate = useNavigate();
 
   const handleOtpChange = (e) => {
@@ -11,7 +11,7 @@ function OTPComponent({name, email, password, role, specialty}) {
   };
 
   const verifyOTP = async (e) => {
-    e.preventDefault(); // Prevents default form submission behavior
+    e.preventDefault();
 
     try {
       const response = await axios.post(

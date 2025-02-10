@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from "react";
 import { useNavigate } from "react-router-dom";
+// import { useAuth } from "../context/authContext";
 import Slider from "react-slick";
 import AOS from "aos";
 import "aos/dist/aos.css";
@@ -30,7 +31,6 @@ const CustomArrow = ({ direction, onClick }) => {
 
 const Home = () => {
   // const { token, role, logout } = useAuth();
-  const token = Cookies.get("token"); 
   const { theme, toggleTheme } = useTheme();
   useEffect(() => {
     document.body.className = theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black";
@@ -40,7 +40,7 @@ const Home = () => {
   const navigate = useNavigate();
 
   const handleDashboardRedirect = () => {
-    if (!token) {
+    if (!document.cookie.includes("token=")) {
       toast.error("You need to log in first");
       navigate("/login");
       return;
@@ -120,7 +120,7 @@ const Home = () => {
               <FaSun className="text-white dark:text-white" />
             )}
           </button>
-          {token  ? (
+          {document.cookie.includes("token=")  ? (
             <>
               <button 
               // onClick={logout} 

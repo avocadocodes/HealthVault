@@ -4,6 +4,7 @@ const User = require("../models/User");
 const authMiddleware = async (req,res,next)=>{
   try {
       const {token} =req.cookies
+      console.log(token)
       if(!token)throw Error("Please login")
       const decodedUser=jwt.verify(token,process.env.JWT_SECRET)
       const {id} =decodedUser

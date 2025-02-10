@@ -315,6 +315,7 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+// import { useAuth } from "../context/authContext";
 import { dateFnsLocalizer } from "react-big-calendar";
 import Cookies from "js-cookie";
 import format from "date-fns/format";
