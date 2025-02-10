@@ -3,7 +3,6 @@ import "./tailwind.css";
 import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
 import { Provider } from "react-redux";
 import { store } from "./Store/store"; 
-import { AuthProvider, useAuth } from "./context/authContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { ToastContainer } from "react-toastify";
 
@@ -17,17 +16,17 @@ import BookAppointment from "./components/BookAppointment";
 import PatientAppointments from "./components/PatientAppointments";
 import "./index.css";
 
-const ProtectedRoute = ({ element, roleRequired }) => {
-  const { token, role } = useAuth();
-  return token && role === roleRequired ? element : <Navigate to="/login" />;
-};
+// const ProtectedRoute = ({ element, roleRequired }) => {
+//   const { token, role } = useAuth();
+//   return token && role === roleRequired ? element : <Navigate to="/login" />;
+// };
 
 const router = createBrowserRouter([
   { path: "/", element: <Home /> },
   { path: "/login", element: <Login /> },
   { path: "/register-user", element: <RegisterUser /> },
-  { path: "/dashboard", element: <ProtectedRoute element={<Dashboard />} roleRequired="doctor" /> },
-  { path: "/patient-dashboard", element: <ProtectedRoute element={<PatientDashboard />} roleRequired="patient" /> },
+  { path: "/dashboard", element: <Dashboard />},
+  { path: "/patient-dashboard", element: <PatientDashboard />},
   { path: "/patients/:id/stats", element: <PatientDetails /> },
   { path: "/book-appointment/:doctorId", element: <BookAppointment /> },
   { path: "/patient-appointments", element: <PatientAppointments /> },
@@ -35,14 +34,12 @@ const router = createBrowserRouter([
 
 const App = () => {
   return (
-    <AuthProvider>
       <ThemeProvider>
         <Provider store={store}>
           <RouterProvider router={router} />
           <ToastContainer />
         </Provider>
       </ThemeProvider>
-    </AuthProvider>
   );
 };
 

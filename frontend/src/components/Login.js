@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion"; 
-import { useAuth } from "../context/authContext";
 import LoginBackground from "../images/login.png";
 
 const Login = () => {
@@ -13,15 +12,19 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // navigate("/dashboard");
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/auth/login`,
         { email, password },
         { withCredentials: true } 
       );
+      
       if(response.status!=200)throw Error("wrong credentials")
       const { token, user } = response.data;
+      console.log(user.role);
       navigate(user.role === "doctor" ? "/dashboard" : "/patient-dashboard");
+      
     } catch (err) {
       setError(err.response?.data?.message || "Login failed. Try again.");
     }
