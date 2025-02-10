@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/authContext";
+// import { useAuth } from "../context/authContext";
 import { dateFnsLocalizer } from "react-big-calendar";
 import format from "date-fns/format";
 import parse from "date-fns/parse";
@@ -44,7 +44,7 @@ const PatientDashboard = () => {
   }, [theme]);
 
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  // const { logout } = useAuth();
 
   const fetchAppointments = async () => {
     try {
@@ -181,7 +181,7 @@ const PatientDashboard = () => {
             )}
           </button>
           <button
-            onClick={logout}
+            // onClick={logout}
             className="p-2 rounded-full hover:bg-gray-700"
           >
             {theme === "light" ? (
