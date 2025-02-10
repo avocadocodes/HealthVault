@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/authContext";
 import Slider from "react-slick";
 import AOS from "aos";
 import "aos/dist/aos.css";
@@ -28,40 +29,23 @@ const CustomArrow = ({ direction, onClick }) => {
 };
 
 const Home = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    setIsLoggedIn(false);
-    navigate("/");
-  };
+  const { token, role, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   useEffect(() => {
     document.body.className = theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black";
+    AOS.init({ duration: 1000, offset: 200, once: true });
   }, [theme]);
-  const [role, setRole] = useState(null);
   
   const navigate = useNavigate();
-  useEffect(() => {
-    AOS.init({
-      duration: 1000, 
-      offset: 200, 
-      once: true, 
-    });
-    const userRole = localStorage.getItem("role");
-    if (isLoggedIn && userRole) {
-      setRole(userRole);
-    }
-  }, [isLoggedIn]);
 
   const handleDashboardRedirect = () => {
-    if (role === "patient") {
-      navigate("/patient-dashboard");
-    } else if (role === "doctor") {
-      navigate("/dashboard");
-    } else {
-      toast.error("Role not recognized");
+    if (!token) {
+      toast.error("You need to log in first");
+      navigate("/login");
+      return;
     }
+    
+    navigate(role === "patient" ? "/patient-dashboard" : "/dashboard");    
   };
   const blogs = [
     { title: "Healthy Living Tips", description: "Discover ways to maintain a healthy lifestyle.", url: "https://www.healthline.com/health/how-to-maintain-a-healthy-lifestyle" },
@@ -135,7 +119,7 @@ const Home = () => {
               <FaSun className="text-white dark:text-white" />
             )}
           </button>
-          {isLoggedIn ? (
+          {token  ? (
             <>
               <button onClick={handleLogout} className="hover:underline">
                 {theme === "light" ? (

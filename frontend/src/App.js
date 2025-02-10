@@ -1,70 +1,49 @@
-import React, { useEffect, useState } from "react";
-import './tailwind.css';
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import React from "react";
+import "./tailwind.css";
+import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
+import { Provider } from "react-redux";
+import { store } from "./Store/store"; 
+import { AuthProvider, useAuth } from "./context/authContext";
+import { ThemeProvider } from "./context/ThemeContext";
+import { ToastContainer } from "react-toastify";
+
 import Home from "./components/Home";
 import Login from "./components/Login";
 import Dashboard from "./components/Dashboard";
 import RegisterUser from "./components/RegisterUser";
-import { ToastContainer } from "react-toastify";
 import PatientDetails from "./components/PatientDetails";
 import PatientDashboard from "./components/PatientDashboard";
 import BookAppointment from "./components/BookAppointment";
 import PatientAppointments from "./components/PatientAppointments";
-import { ThemeProvider } from "./context/ThemeContext";
 import "./index.css";
 
+const ProtectedRoute = ({ element, roleRequired }) => {
+  const { token, role } = useAuth();
+  return token && role === roleRequired ? element : <Navigate to="/login" />;
+};
+
+const router = createBrowserRouter([
+  { path: "/", element: <Home /> },
+  { path: "/login", element: <Login /> },
+  { path: "/register-user", element: <RegisterUser /> },
+  { path: "/dashboard", element: <ProtectedRoute element={<Dashboard />} roleRequired="doctor" /> },
+  { path: "/patient-dashboard", element: <ProtectedRoute element={<PatientDashboard />} roleRequired="patient" /> },
+  { path: "/patients/:id/stats", element: <PatientDetails /> },
+  { path: "/book-appointment/:doctorId", element: <BookAppointment /> },
+  { path: "/patient-appointments", element: <PatientAppointments /> },
+]);
+
 const App = () => {
-  const [token, setToken] = useState(localStorage.getItem("token"));
-  const [role, setRole] = useState(localStorage.getItem("role"));
-
-  const handleLogin = (newToken, newRole) => {
-    localStorage.setItem("token", newToken);
-    localStorage.setItem("role", newRole);
-    setToken(newToken);
-    setRole(newRole);
-  };
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    setToken(null);
-    setRole(null);
-  };
-  
-
-  useEffect(() => {
-    console.log("Token:", token, "Role:", role);
-  }, [token, role]);
-
   return (
-    <ThemeProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route
-            path="/login"
-            element={<Login onLogin={handleLogin} />}
-          />
-          <Route path="/register-user" element={<RegisterUser />} />
-          {token && role === "doctor" ? (
-            <Route path="/dashboard" element={<Dashboard />} />
-          ) : (
-            <Route path="/dashboard" element={<Navigate to="/login" />} />
-          )}
-          {token && role === "patient" ? (
-            <Route path="/patient-dashboard" element={<PatientDashboard />} />
-          ) : (
-            <Route path="/patient-dashboard" element={<Navigate to="/login" />} />
-          )}
-          <Route path="/patients/:id/stats" element={<PatientDetails />} />
-          <Route path="/book-appointment/:doctorId" element={<BookAppointment />} />
-          <Route path="/patient-appointments" element={<PatientAppointments />} />
-          <Route path="/" element={<Home isLoggedIn={!!token} onLogout={handleLogout} />} />
-        </Routes>
-        <ToastContainer />
-      </Router>
-    </ThemeProvider>
-    
+    <AuthProvider>
+      <ThemeProvider>
+        <Provider store={store}>
+          <RouterProvider router={router} />
+          <ToastContainer />
+        </Provider>
+      </ThemeProvider>
+    </AuthProvider>
   );
 };
 
-export default App;
+export default App; 

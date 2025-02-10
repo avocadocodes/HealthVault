@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/authContext";
 import { dateFnsLocalizer } from "react-big-calendar";
 import format from "date-fns/format";
 import parse from "date-fns/parse";
@@ -11,6 +12,7 @@ import { toast } from "react-toastify";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { useTheme } from "../context/ThemeContext";
 import { FaMoon, FaSun, FaSignOutAlt, FaHome  , FaCalendarCheck } from "react-icons/fa";
+
 const locales = {
   "en-US": require("date-fns/locale/en-US"),
 };
@@ -26,7 +28,7 @@ const localizer = dateFnsLocalizer({
 const PatientDashboard = () => {
   const [doctors, setDoctors] = useState([]);
   const [appointments, setAppointments] = useState([]);
-  const [error, setError] = useState(null);
+  // const [error, setError] = useState(null);
   const [upcomingAppointments, setUpcomingAppointments] = useState([]);
   const [completedAppointments, setCompletedAppointments] = useState([]);
   const [searchQuery, setSearchQuery] = useState({ name: "", specialty: "" });
@@ -42,12 +44,8 @@ const PatientDashboard = () => {
   }, [theme]);
 
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    navigate("/");
-  };
   const fetchAppointments = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -183,7 +181,7 @@ const PatientDashboard = () => {
             )}
           </button>
           <button
-            onClick={handleLogout}
+            onClick={logout}
             className="p-2 rounded-full hover:bg-gray-700"
           >
             {theme === "light" ? (
@@ -197,58 +195,58 @@ const PatientDashboard = () => {
       {/* Dynamic Page Content */}
         <div className="p-6 flex-1 overflow-auto">
           {activePage === "/request-appointment" && (
-      <motion.div
-      className="bg-gray-800 p-6 rounded-lg shadow-lg mb-6"
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <h2 className="text-xl font-semibold mb-4">Find Doctors</h2>
-      <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <input
-          type="text"
-          name="name"
-          placeholder="Search by name..."
-          value={searchQuery.name}
-          onChange={handleInputChange}
-          className="w-full p-3 bg-gray-900 text-white border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <input
-          type="text"
-          name="specialty"
-          placeholder="Search by specialty..."
-          value={searchQuery.specialty}
-          onChange={handleInputChange}
-          className="w-full p-3 bg-gray-900 text-white border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <button
-          type="submit"
-          className="md:col-span-2 bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-md transition"
-        >
-          Search
-        </button>
-      </form>
-      {doctors.map((doctor) => (
-        <div
-          key={doctor._id}
-          className="bg-gray-700 p-4 rounded-md flex justify-between items-center mb-4"
-        >
-          <div>
-            <h2 className="text-lg font-bold">{doctor.name}</h2>
-            <p className="text-gray-400">Specialty: {doctor.specialty}</p>
-          </div>
-          <button
-            onClick={() => navigate(`/book-appointment/${doctor._id}`)}
-            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
-          >
-            Book Appointment
-          </button>
-        </div>
-      ))}
-      {doctors.length === 0 && (
-        <p className="text-gray-400">No doctors found matching your search.</p>
-      )}
-    </motion.div>
+              <motion.div
+              className="bg-gray-800 p-6 rounded-lg shadow-lg mb-6"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <h2 className="text-xl font-semibold mb-4">Find Doctors</h2>
+              <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="Search by name..."
+                  value={searchQuery.name}
+                  onChange={handleInputChange}
+                  className="w-full p-3 bg-gray-900 text-white border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <input
+                  type="text"
+                  name="specialty"
+                  placeholder="Search by specialty..."
+                  value={searchQuery.specialty}
+                  onChange={handleInputChange}
+                  className="w-full p-3 bg-gray-900 text-white border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  type="submit"
+                  className="md:col-span-2 bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-md transition"
+                >
+                  Search
+                </button>
+              </form>
+              {doctors.map((doctor) => (
+                <div
+                  key={doctor._id}
+                  className="bg-gray-700 p-4 rounded-md flex justify-between items-center mb-4"
+                >
+                  <div>
+                    <h2 className="text-lg font-bold">{doctor.name}</h2>
+                    <p className="text-gray-400">Specialty: {doctor.specialty}</p>
+                  </div>
+                  <button
+                    onClick={() => navigate(`/book-appointment/${doctor._id}`)}
+                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
+                  >
+                    Book Appointment
+                  </button>
+                </div>
+              ))}
+              {doctors.length === 0 && (
+                <p className="text-gray-400">No doctors found matching your search.</p>
+              )}
+            </motion.div>
           )}
            {activePage === "/completed-appointment" && (
             <motion.div
