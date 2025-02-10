@@ -33,8 +33,8 @@ exports.register = async (req, res) => {
 
 exports.verify= async (req,res)=>{
     try {
-      const {name, email, password, role, specialty,enteredToken}=req.body
-      await verifyOTP(enteredToken,email)
+      const {name, email, password, role, specialty,enteredOtp}=req.body
+      await verifyOTP(enteredOtp,email)
       const hashedPassword = await bcrypt.hash(password, 10);
       const user = new User({ name, email, password: hashedPassword, role, specialty });
       await user.save();
@@ -61,17 +61,10 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: "Invalid role." });
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      console.error("Invalid credentials for email:", email);
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
+    const validated=await user.validatePassword(password);
+    if(!validated)throw Error("Invalid credentials")
     console.log("JWT_SECRET used for signing:", process.env.JWT_SECRET);
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
+    const token=await user.getAccessToken()
     console.log("Login successful, token generated for:", email);
     res.status(200).json({
       token,
@@ -81,7 +74,12 @@ exports.login = async (req, res) => {
         email: user.email,
         role: user.role,
       },
-    });
+    }).cookie("token",token,{
+      expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+      sameSite:"lax",
+      httpOnly:true,
+      secure:true
+      });
   } catch (error) {
     console.error("Error during login:", error);
     res.status(500).json({ error: error.message });
@@ -107,9 +105,9 @@ exports.forgotpassoword=async (req,res)=>{
   }
 }
 exports.resetpassword=async(req,res)=>{
-  const {email,enteredToken,password}=req.body
+  const {email,enteredOtp,password}=req.body
   try {
-    await verifyOTP(enteredToken,email)
+    await verifyOTP(enteredOtp,email)
     const user = await User.findOne({ email });
     if (!user) {
       console.error("User not found for email:", email);
@@ -124,4 +122,8 @@ exports.resetpassword=async(req,res)=>{
     console.error("Error during login:", error);
     res.status(500).json({ error: error.message });
   }
+}
+
+exports.logout=async(req,res)=>{
+  res.cookie("token",null,{expires: new Date(Date.now())}).json({message:"logout successful"})
 }

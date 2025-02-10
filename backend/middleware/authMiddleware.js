@@ -1,19 +1,20 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
-const authMiddleware = async (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token) {
-    console.error("No token provided");
-    return res.status(401).json({ error: "Unauthorized" });
-  }
+const authMiddleware = async (req,res,next)=>{
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = await User.findById(decoded.id).select("-password");
-    next();
-  } catch (err) {
-    console.error("Token error:", err.message);
-    res.status(401).json({ error: "Invalid token" });
+      const {token} =req.cookies
+      if(!token)throw Error("Please login")
+      const decodedUser=jwt.verify(token,process.env.JWT_SECRET)
+      const {id} =decodedUser
+      if(!id) throw Error("Invalid token, try logging in again")
+      const user=await User.findById(id)
+      if(!user) throw("invalid token")
+      console.log(user)
+      req.user=user
+      next()
+  } catch (error) {
+      res.status(401).json({error:error.message})
   }
-};
+}
 module.exports = authMiddleware;

@@ -1,9 +1,8 @@
-
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
-
+var cookieParser = require('cookie-parser')
 const authRoutes = require("./routes/authRoutes");
 const patientRoutes = require("./routes/patientRoutes");
 const bookingRequestsRoutes = require("./routes/bookingRequestsRoutes");
@@ -18,7 +17,7 @@ connectDB();
 const app = express();
 app.use(cors());
 app.use(express.json());
-
+app.use(cookieParser())
 app.use("/api/auth", authRoutes);
 app.use("/api/patients", patientRoutes);
 app.use("/api/booking-requests", bookingRequestsRoutes);
