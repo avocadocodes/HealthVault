@@ -367,7 +367,7 @@ const PatientDashboard = () => {
       const response = await axios.get(
         `${process.env.REACT_APP_API_URL}/appointments`,
         {
-          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
         }
       );
       console.log("Fetched Appointments:", response.data);
@@ -401,7 +401,7 @@ const PatientDashboard = () => {
       const response = await axios.get(
         `${process.env.REACT_APP_API_URL}/users/doctors`,
         {
-          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
           params: searchQuery, 
         }
       );
@@ -418,7 +418,7 @@ const PatientDashboard = () => {
         const result = await axios.get(
           `${process.env.REACT_APP_API_URL}/appointments/patient`,
           {
-            headers: { Authorization: `Bearer ${token}` },
+            withCredentials: true,
           }
         );
         const { upcomingAppointments, completedAppointments } = result.data;
