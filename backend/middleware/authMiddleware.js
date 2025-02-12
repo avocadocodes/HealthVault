@@ -22,11 +22,11 @@ const authMiddleware = async (req, res, next) => {
       return res.status(403).json({ error: "Invalid token or user not found" });
     }
     // 
-    res.cookie("role", user.role, {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Strict",
-    });
+    // res.cookie("role", user.role, {
+    //   httpOnly: false,
+    //   secure: process.env.NODE_ENV === "production",
+    //   sameSite: "Strict",
+    // });
     // 
     console.log("Authenticated user:", user);
     req.user = user;

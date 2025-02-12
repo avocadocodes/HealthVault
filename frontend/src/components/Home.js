@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from "react";
 import { useNavigate } from "react-router-dom";
-// import { useAuth } from "../context/authContext";
 import Slider from "react-slick";
 import AOS from "aos";
 import "aos/dist/aos.css";
@@ -31,7 +30,8 @@ const CustomArrow = ({ direction, onClick }) => {
 };
 
 const Home = () => {
-  // const { token, role, logout } = useAuth();
+  const token=Cookies.get("token")
+  const role=Cookies.get("role")
   const { theme, toggleTheme } = useTheme();
   useEffect(() => {
     document.body.className = theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black";
@@ -42,22 +42,11 @@ const Home = () => {
 
   const handleDashboardRedirect = async () => {
     try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}/users/me`, // Ensure this endpoint exists
-        { withCredentials: true }
-      );
       
-      const userRole = response.data.role;
+      if(!token)navigate('/login')
   
-      if (!userRole) {
-        toast.error("User role not found. Please log in again.");
-        navigate("/login");
-        return;
-      }
-  
-      navigate(userRole === "patient" ? "/patient-dashboard" : "/dashboard");
+      navigate(role === "patient" ? "/patient-dashboard" : "/dashboard");
     } catch (error) {
-      console.error("Failed to fetch user role:", error);
       toast.error("Session expired. Please log in again.");
       navigate("/login");
     }

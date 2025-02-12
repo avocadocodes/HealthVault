@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { FaMoon, FaSun, FaSignOutAlt, FaHome } from "react-icons/fa";
 import { useTheme } from "../context/ThemeContext";
-
+import axios from 'axios'
 const Navbar = () => {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
@@ -11,12 +11,19 @@ const Navbar = () => {
   // Fetch role from cookies
   const role = Cookies.get("role");
 
-  const handleLogout = () => {
+  const handleLogout = async() => {
     // Remove token and role cookies
-    Cookies.remove("token");
-    Cookies.remove("role");
-    
-    navigate("/login"); // Redirect to login page after logout
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/auth/logout`,
+        { withCredentials: true } 
+      );
+      
+      if(response.status!=200)throw Error("unable to logout at the moment")
+      navigate("/login"); // Redirect to login page after logout
+    } catch (err) {
+      console.log(err)
+    }
   };
 
   return (

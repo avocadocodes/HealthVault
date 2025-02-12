@@ -8,5 +8,5 @@ router.post("/verify",verify)
 router.post("/login", login);
 router.post("/forgotpassword", forgotpassoword);
 router.post("/resetpassword", resetpassword);
-router.post("/logout", logout);
+router.get("/logout", logout);
 module.exports = router;                

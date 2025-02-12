@@ -9,7 +9,7 @@ const tokenTime=2
 
 const verifyOTP= async function (enteredOtp,email){
   const otp=await redisClient.get(email)
-
+  console.log(enteredOtp,otp)
   if(otp!=enteredOtp)throw Error("Wrong OTP")
   return ;
 }
@@ -72,15 +72,11 @@ exports.login = async (req, res) => {
       expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
       sameSite:"lax",
       secure:process.env.NODE_ENV === "production"
-      })
-      // 
-      .cookie("role", user.role, {
-        expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
-        sameSite: "Lax",
+      }).cookie("role", user.role, {
+        httpOnly: false,
         secure: process.env.NODE_ENV === "production",
-        httpOnly: false, 
+        sameSite: "Strict",
       })
-      // 
       .json({
       token,
       user: {
@@ -97,7 +93,7 @@ exports.login = async (req, res) => {
 };
 
 exports.forgotpassoword=async (req,res)=>{
-  const {email,name}=req.body
+  const {email}=req.body
   try {
     const user = await User.findOne({ email });
     if (!user) {
@@ -105,10 +101,11 @@ exports.forgotpassoword=async (req,res)=>{
       return res.status(404).json({ message: "No such email exists" });
     }
     const token = createOTP()
+    const name ="User"
     const otp=await generateEmail(name,email,token,tokenTime)
     await redisClient.set(email,token,'EX',tokenTime*60)
     console.log(otp);
-    res.json({message:`Email sent to ${email} , please verify the token`})
+    res.json({message:`Email sent to ${email} , please verify the token`}).status(200)
   } catch (error) {
     console.error("Error during login:", error);
     res.status(500).json({ error: error.message });
@@ -127,7 +124,7 @@ exports.resetpassword=async(req,res)=>{
     user.password = hashedPassword;
     await user.save();
     await redisClient.del(email);
-    res.json({ message: "Password updated successfully" });
+    res.json({ message: "Password updated successfully" }).status(200);
   } catch (error) {
     console.error("Error during login:", error);
     res.status(500).json({ error: error.message });
@@ -135,5 +132,7 @@ exports.resetpassword=async(req,res)=>{
 }
 
 exports.logout=async(req,res)=>{
-  res.cookie("token",null,{expires: new Date(Date.now())}).json({message:"logout successful"})
+  res.cookie("token",null,{expires: new Date(Date.now())})
+  .cookie("role", null, {expires: new Date(Date.now())})
+  .json({message:"logout successful"})
 }
