@@ -323,6 +323,8 @@ import parse from "date-fns/parse";
 import startOfWeek from "date-fns/startOfWeek";
 import getDay from "date-fns/getDay";
 import axios from "axios";
+import Sidebar from "./Sidebar";
+import Navbar from "./Navbar";
 import { toast } from "react-toastify";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { useTheme } from "../context/ThemeContext";
@@ -431,84 +433,28 @@ const PatientDashboard = () => {
 
     fetchAppointments();
   }, []);
-
+  const [role, setRole] = useState(null);
+  useEffect(() => {
+    const userRole = Cookies.get("role"); // Fetch role from cookies
+    if (!userRole) {
+      console.error("Role not found");
+      return;
+    }
+    setRole(userRole);
+  }, []);
   return (
     <div className={`flex h-screen min-h-screen ${theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black"}`}>
-      
-    {/* Sidebar */}
-      <aside className="w-64 min-h-screen bg-gray-900 text-white p-4 flex flex-col">
-        <h2 className="text-xl font-bold mb-6">Dashboard</h2>
-        <nav>
-          <div>
-            <button
-              className="w-full text-left py-2 px-4 hover:bg-gray-700 rounded"
-              onClick={() => toggleMenu("appointments")}
-            >
-              <FaCalendarCheck className="inline-block mr-2" /> Appointments
-            </button>
-            {activeMenu === "appointments" && (
-              <div className="pl-6">
-                
-                <button
-                  className="w-full text-left py-2 px-4 hover:bg-gray-700 rounded"
-                  onClick={() => setActivePage("/request-appointment")}
-                >
-                  Request Appointment
-                </button>
-                <button
-                  className="w-full text-left py-2 px-4 hover:bg-gray-700 rounded"
-                  onClick={() => setActivePage("/completed-appointment")}
-                >
-                  Completed Appointment
-                </button>
-                <button
-                  className="w-full text-left py-2 px-4 hover:bg-gray-700 rounded"
-                  onClick={() => {setActivePage("/appointments");
-        
-                  }}
-                >
-                  Upcoming Appointments
-                </button>
-              </div>
-            )}
-            
-          </div>
-        </nav>
-      </aside>
-      {/* Header Section */}
-      <div className="flex items-center justify-end pr-64 pl-10 mb-6 fixed w-full top-0 left-64 z-50">
-        <div className="flex space-x-4">
-          <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-gray-700">
-            {theme === "light" ? (
-              <FaMoon className="text-black dark:text-white" />
-            ) : (
-              <FaSun className="text-white dark:text-white" />
-            )}
-          </button>
-          <button
-            onClick={() => navigate("/")}
-            className="p-2 rounded-full hover:bg-gray-700"
-          >
-            {theme === "light" ? (
-              <FaHome  className="text-black dark:text-white" />
-            ) : (
-              <FaHome  className="text-white dark:text-white" />
-            )}
-          </button>
-          <button
-            // onClick={logout}
-            className="p-2 rounded-full hover:bg-gray-700"
-          >
-            {theme === "light" ? (
-              <FaSignOutAlt className="text-black dark:text-white" />
-            ) : (
-              <FaSignOutAlt className="text-white dark:text-white" />
-            )}
-          </button>
-        </div>
-      </div>
+      <Sidebar 
+          activeMenu={activeMenu} 
+          toggleMenu={toggleMenu} 
+          activePage={activePage} 
+          setActivePage={setActivePage}
+          role={role} 
+      />
+      <Navbar />
+     
       {/* Dynamic Page Content */}
-        <div className="p-6 flex-1 overflow-auto">
+        <div className="p-6 mt-16 flex-1 overflow-auto">
           {activePage === "/request-appointment" && (
               <motion.div
               className="bg-gray-800 p-6 rounded-lg shadow-lg mb-6"

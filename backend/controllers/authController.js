@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 const redisClient= require("../utils/redisClient")
 const generateEmail= require("../utils/sendEmail")
 const createOTP= require("../utils/createOTP.js")
@@ -66,11 +67,21 @@ exports.login = async (req, res) => {
     console.log("JWT_SECRET used for signing:", process.env.JWT_SECRET);
     const token=await user.getAccessToken()
     console.log("Login successful, token generated for:", email);
+
     res.status(200).cookie("token",token,{
       expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
       sameSite:"lax",
       secure:process.env.NODE_ENV === "production"
-      }).json({
+      })
+      // 
+      .cookie("role", user.role, {
+        expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+        sameSite: "Lax",
+        secure: process.env.NODE_ENV === "production",
+        httpOnly: false, 
+      })
+      // 
+      .json({
       token,
       user: {
         id: user._id,
