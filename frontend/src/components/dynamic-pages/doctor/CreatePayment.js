@@ -1,6 +1,8 @@
 import React from "react";
-
-const CreatePayment = ({ newPayment, setNewPayment, handleCreatePayment, theme }) => (
+import { useState } from "react";
+const CreatePayment = ({ newPayment, setNewPayment, handleCreatePayment, theme }) => {
+  const [completePaymentOptions,setcompletePaymentOptions]=useState(newPayment.status==="Completed")
+  return (
   <div>
     <h3 className="text-xl font-bold mb-4">Add a Payment</h3>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -27,17 +29,47 @@ const CreatePayment = ({ newPayment, setNewPayment, handleCreatePayment, theme }
       />
       <select
         value={newPayment.status}
-        onChange={(e) => setNewPayment({ ...newPayment, status: e.target.value })}
+        onChange={(e) => {
+          setNewPayment({ ...newPayment, status: e.target.value })
+          if(e.target.value==="Completed")setcompletePaymentOptions(true)
+          else setcompletePaymentOptions(false)
+        }}
         className={`p-3 ${theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-black"} rounded-md`}
       >
         <option value="Pending">Pending</option>
         <option value="Completed">Completed</option>
       </select>
+      {
+        completePaymentOptions&&
+        <input
+        type="text"
+        placeholder="Transaction Id"
+        value={newPayment.transactionId}
+        onChange={(e) => setNewPayment({ ...newPayment, transactionId: e.target.value })}
+        className={`p-3 ${theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-black"} rounded-md`}
+      />
+      }
+      {
+        completePaymentOptions&&
+        <select
+        value={newPayment.type}
+        onChange={(e) => {
+          setNewPayment({ ...newPayment, type: e.target.value })
+        }}
+        className={`p-3 ${theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-black"} rounded-md`}
+        >
+            <option value="Credit Card">Credit Card</option>
+            <option value="PayPal">PayPal</option>
+            <option value="UPI">UPI</option>
+            <option value="Bank Transfer">Bank Transfer</option>
+        </select>
+      }
     </div>
     <button onClick={handleCreatePayment} className="bg-blue-500 px-4 py-2 rounded-md mt-4 hover:bg-blue-600">
       Add Payment
     </button>
   </div>
-);
+  )
+};
 
 export default CreatePayment;

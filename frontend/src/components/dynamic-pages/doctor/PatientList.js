@@ -1,13 +1,35 @@
-import React, {useState} from "react";
+import React, {useState,useEffect} from "react";
 
-const PatientList = ({ patients=[], handleEditPatient, handleDeletePatient, handleUpdatePatient,editingPatient, 
+const PatientList = ({patients=[],  handleEditPatient, handleDeletePatient, handleUpdatePatient,editingPatient, 
   setEditingPatient, theme }) => {
-  // const [editingPatient, setEditingPatient] = useState(null); // Track the patient being edited
+  //   const [patients,setPatients]=useState([])
+  //   const fetchPatients = async () => {
+  //     try {
+  //       console.log("Fetching patient data...");
+  //       const response = await axios.get(
+  //         `${process.env.REACT_APP_API_URL}/patients`,
+  //         {withCredentials: true }
+  //       );
+  //       console.log("Fetched Patients:", response.data);
+  //       if (Array.isArray(response.data)) {
+  //         setPatients(response.data);
+  //       } else {
+  //         console.error("Patients response is not an array!", response.data);
+  //         setPatients([]); 
+  //       }
+  //     } catch (err) {
+  //       console.error("Failed to fetch patients:", err);
+  //     }
+  //   };
+  // // const [editingPatient, setEditingPatient] = useState(null); // Track the patient being edited
 
-  // const handleEditPatient = (patient) => {
-  //   console.log("Editing patient:", patient); // Debugging
-  //   setEditingPatient(patient);
-  // };
+  // // const handleEditPatient = (patient) => {
+  // //   console.log("Editing patient:", patient); // Debugging
+  // //   setEditingPatient(patient);
+  // // };
+  useEffect(()=>{
+    console.log("huihui",patients)
+  },[patients])
   return(
   <div>
     <h3 className="text-xl font-bold mb-4">Patients List</h3>

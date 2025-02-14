@@ -48,12 +48,8 @@ const Dashboard = () => {
   const [newPatient, setNewPatient] = useState({
     name: "",
     age: "",
-    gender: "Male",
-    issue: "",
-    medicines: "",
-    status: "Critical" 
-});
-
+    gender: "Male", 
+  });
   const [editingPatient, setEditingPatient] = useState(null);
   const [payments, setPayments] = useState([]);
   const [newPayment, setNewPayment] = useState({
@@ -62,6 +58,7 @@ const Dashboard = () => {
     type: "Credit Card", 
     transactionId: "",
     paymentStatus: "Pending",
+    remarks:""
   });
   const [pendingPayments, setPendingPayments] = useState([]);
   const [selectedPayment, setSelectedPayment] = useState(null); 
@@ -208,7 +205,7 @@ const Dashboard = () => {
       toast.error("Failed to mark appointment as visited");
     }
   };
-  const handleAddPatient = async () => {
+  const handleAddPatient = async (newPatient,setNewPatient) => {
     // if (!newPatient.name || !newPatient.age || !newPatient.gender) {
     //   toast.error("All fields are required!");
     //   return;
@@ -224,11 +221,11 @@ const Dashboard = () => {
           withCredentials: true, 
         }
       );
-      console.log("✅ Patient Added Response:", response.data); // Debugging log
+
       if (response.data) {
         setPatients((prev) => [...prev, response.data.patient]); // Add to state
         toast.success("Patient added successfully!");
-        setNewPatient({ name: "", age: "", gender: "Male" }); // Reset form
+        setNewPatient({ name: "", age: "", gender: "Male" ,issue:"" , medicines:"",status:"Critical"}); // Reset form
       } else {
         throw new Error("Failed to receive response from the server");
       }
@@ -324,31 +321,19 @@ const Dashboard = () => {
     }
   };
   const handleCreatePayment = async () => {
-    const formattedPayment = {
-      ...newPayment,
-      amount: Number(newPayment.amount), 
-      transactionId: newPayment.paymentStatus === "Completed" ? newPayment.transactionId : undefined,
-      type: newPayment.paymentStatus === "Completed" ? newPayment.type : undefined, 
-      remarks: newPayment.remarks || "",
-    };
-    console.log("Submitting Payment Data:", formattedPayment);
-    if (!newPayment.name || !newPayment.amount ||  !newPayment.paymentStatus) {
+    if (!newPayment.name || !newPayment.amount ||  !newPayment.remarks ||(newPayment.status==="Completed"&&!newPayment.transactionId) ) {
       toast.error("All fields are required!");
-      return;
-    }
-    if (newPayment.paymentStatus === "Completed" && (!newPayment.type || !newPayment.transactionId)) {
-      toast.error("Payment Type and Transaction ID are required for completed payments!");
       return;
     }
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/finance/payments`,
-        formattedPayment,
+        newPayment,
         { withCredentials: true}
       );
   
       if (response.data.payment) {
-        if (formattedPayment.paymentStatus === "Completed") {
+        if (newPayment.paymentStatus === "Completed") {
           setPayments((prevPayments) => [...prevPayments, response.data.payment]);
         } else {
           setPendingPayments((prevPayments) => [...prevPayments, response.data.payment]);
@@ -356,8 +341,7 @@ const Dashboard = () => {
   
         toast.success("Payment added successfully!");
         setNewPayment({ name: "", amount: "", type: "", transactionId: "", remarks: "", paymentStatus: "Pending" });
-        setActivePage(formattedPayment.paymentStatus === "Completed" ? "/payments" : "/pending-payments");
-        console.log("Submitting Payment Data:", JSON.stringify(formattedPayment, null, 2));
+        setActivePage(newPayment.paymentStatus === "Completed" ? "/payments" : "/pending-payments");
 
       } else {
         throw new Error("Failed to receive payment response from the server");
@@ -418,6 +402,10 @@ const Dashboard = () => {
       fetchPatients();
     }
   }, [activePage]);
+
+  useEffect(() => {
+    console.log("Patients updated in parent component:", patients);
+  }, [patients]);
   
   useEffect(() => {
     if (activePage === "/appointments") {

@@ -1,6 +1,6 @@
 const Payment = require("../models/Payment");
 const jwt = require("jsonwebtoken");
-
+const mongoose =require("mongoose")
 exports.getPayments = async (req, res) => {
   try {
     const token = req.cookies.token;
@@ -17,15 +17,14 @@ exports.addPayment = async (req, res) => {
     console.log("Received Payment Data:", req.body);
     const { name, amount, type, transactionId, paymentStatus, remarks } = req.body;
     if (!name || !amount ||  !paymentStatus) {
+      if(!name)console.log("hsdljfl")
       return res.status(400).json({ error: "All fields are required" });
     }
     if (paymentStatus === "Completed" && (!type || !transactionId)) {
       return res.status(400).json({ error: "Payment Type and Transaction ID are required for completed payments" });
     }
-    const token = req.cookies.token;
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const newPayment = new Payment({
-      user: decoded.id,
+      user: req.user.id,
       name,
       amount:Number(amount),
       type:paymentStatus === "Completed" ? type : undefined,

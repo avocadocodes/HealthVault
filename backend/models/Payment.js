@@ -5,7 +5,7 @@ const paymentSchema = new mongoose.Schema({
   name: { type: String, required: true },
   amount: { type: Number, required: true },
   type: { type: String, default: null }, 
-  transactionId: { type: String,  unique: true, sparse:true, default: undefined },
+  transactionId: { type: String, sparse:true, default: undefined },
   remarks: { type: String, default: ""}, 
   paymentStatus: { type: String, enum: ["Pending", "Completed"], required: true}
 }, { timestamps: true });
