@@ -343,6 +343,8 @@ const localizer = dateFnsLocalizer({
 });
 
 const PatientDashboard = () => {
+  const token=Cookies.get("token")
+  const userRole=Cookies.get("role")
   const [doctors, setDoctors] = useState([]);
   const [appointments, setAppointments] = useState([]);
   // const [error, setError] = useState(null);
@@ -384,6 +386,8 @@ const PatientDashboard = () => {
   };
  
   useEffect(() => {
+    if(!token)navigate('/login')
+    if(userRole!='patient')navigate('/')
     if (activePage === "/appointments") {
       fetchAppointments(); 
     }
