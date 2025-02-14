@@ -49,6 +49,9 @@ const Dashboard = () => {
     name: "",
     age: "",
     gender: "Male", 
+    issue:"",
+    medicines:"",
+    status:""
   });
   const [editingPatient, setEditingPatient] = useState(null);
   const [payments, setPayments] = useState([]);

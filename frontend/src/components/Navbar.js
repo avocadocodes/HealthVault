@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
-import { FaMoon, FaSun, FaSignOutAlt, FaHome } from "react-icons/fa";
+import { FaMoon, FaSun, FaSignOutAlt, FaHome, FaUser } from "react-icons/fa";
 import { useTheme } from "../context/ThemeContext";
 import axios from 'axios'
 const Navbar = () => {

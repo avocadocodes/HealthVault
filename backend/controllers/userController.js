@@ -1,5 +1,6 @@
 const User = require("../models/User"); 
 const cloudinary = require("../utils/cloudinary");
+const upload = require("../utils/multer");
 
 exports.getDoctors = async (req, res) => {
   try {
