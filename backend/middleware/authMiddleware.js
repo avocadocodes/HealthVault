@@ -4,7 +4,7 @@ const User = require("../models/User");
 const authMiddleware = async (req, res, next) => {
   try {
     const { token } = req.cookies;
-    console.log("Token received:", token);
+    // console.log("Token received:", token);
 
     if (!token) {
       return res.status(401).json({ error: "Please log in" });
@@ -21,14 +21,7 @@ const authMiddleware = async (req, res, next) => {
     if (!user) {
       return res.status(403).json({ error: "Invalid token or user not found" });
     }
-    // 
-    // res.cookie("role", user.role, {
-    //   httpOnly: false,
-    //   secure: process.env.NODE_ENV === "production",
-    //   sameSite: "Strict",
-    // });
-    // 
-    console.log("Authenticated user:", user);
+    // console.log("Authenticated user:", user);
     req.user = user;
     next();
   } catch (error) {

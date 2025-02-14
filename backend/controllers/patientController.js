@@ -3,15 +3,19 @@ const Patient = require("../models/Patient");
 
 exports.createPatient = async (req, res) => {
   try {
-    const token = req.cookies.token;
-    if (!token) {
-      return res.status(401).json({ error: "Please login first" });
-    }
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.body.user = decoded.id; 
-    const patient = new Patient(req.body);
+    const {
+      name,
+      age,
+      gender,
+      issue,
+      medicines,
+      status
+    } =req.body;
+    console.log(req.body)
+    const id=req.user._id
+    const patient = new Patient({user:id,name,age,gender,issue,medicines,status});
     await patient.save();
-    res.status(201).json(patient);
+    res.status(201).json({patient:patient});
   } catch (error) {
     console.error(error); 
     res.status(500).json({ error: error.message });
