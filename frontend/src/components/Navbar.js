@@ -47,6 +47,15 @@ const Navbar = () => {
         <button onClick={handleLogout} className="p-2 rounded-full hover:bg-gray-700">
           <FaSignOutAlt className="text-white" />
         </button>
+        {/* Profile Button - Only for Doctors */}
+        {role === "doctor" && (
+          <button 
+            onClick={() => navigate("/doctor-profile")} 
+            className="p-2 rounded-full hover:bg-gray-700"
+          >
+            <FaUser className="text-white" />
+          </button>
+        )}
       </div>
     </div>
   );

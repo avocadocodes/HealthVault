@@ -18,14 +18,16 @@ const AddPatient = ({ theme, handleAddPatient }) => {
           type="text"
           placeholder="Patient Name"
           value={newPatient.name}
-          onChange={(e) => setNewPatient({ ...newPatient, name: e.target.value })}
+          // onChange={(e) => setNewPatient({ ...newPatient, name: e.target.value })}
+          onChange={(e) => setNewPatient((prev) => ({ ...prev, name: e.target.value }))}
           className={`p-3 ${theme === "dark" ? "bg-customGrayLight2 text-white" : "bg-white text-black"} rounded-md focus:outline-none`}
         />
         <input
           type="number"
           placeholder="Age"
           value={newPatient.age}
-          onChange={(e) => setNewPatient({ ...newPatient, age: e.target.value })}
+          // onChange={(e) => setNewPatient({ ...newPatient, age: e.target.value })}
+          onChange={(e) => setNewPatient((prev) => ({ ...prev, gender: e.target.value }))}
           className={`p-3 ${theme === "dark" ? "bg-customGrayLight2 text-white" : "bg-white text-black"} rounded-md focus:outline-none`}
         />
         <select
@@ -41,19 +43,21 @@ const AddPatient = ({ theme, handleAddPatient }) => {
           type="text"
           placeholder="Health Issue"
           value={newPatient.issue}
-          onChange={(e) => setNewPatient({ ...newPatient, issue: e.target.value })}
+          // onChange={(e) => setNewPatient({ ...newPatient, issue: e.target.value })}
+          onChange={(e) => setNewPatient((prev) => ({ ...prev, issue: e.target.value }))}
           className={`p-3 ${theme === "dark" ? "bg-customGrayLight2 text-white" : "bg-white text-black"} rounded-md focus:outline-none`}
         />
         <input
           type="text"
           placeholder="Prescribed medicines"
           value={newPatient.medicines}
-          onChange={(e) => setNewPatient({ ...newPatient, medicines: e.target.value })}
+          onChange={(e) => setNewPatient((prev) => ({ ...prev, medicines: e.target.value }))}
           className={`p-3 ${theme === "dark" ? "bg-customGrayLight2 text-white" : "bg-white text-black"} rounded-md focus:outline-none`}
         />
         <select
           value={newPatient.status}
-          onChange={(e) => setNewPatient({ ...newPatient, status: e.target.value })}
+          // onChange={(e) => setNewPatient({ ...newPatient, status: e.target.value })}
+          onChange={(e) => setNewPatient((prev) => ({ ...prev, status: e.target.value }))}
           className={`p-3 ${theme === "dark" ? "bg-customGrayLight2 text-white" : "bg-white text-black"} rounded-md focus:outline-none`}
         >
           <option value="Critical">Critical</option>

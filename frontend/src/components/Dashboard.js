@@ -48,8 +48,12 @@ const Dashboard = () => {
   const [newPatient, setNewPatient] = useState({
     name: "",
     age: "",
-    gender: "Male", 
-  });
+    gender: "Male",
+    issue: "",
+    medicines: "",
+    status: "Critical" 
+});
+
   const [editingPatient, setEditingPatient] = useState(null);
   const [payments, setPayments] = useState([]);
   const [newPayment, setNewPayment] = useState({
@@ -209,7 +213,7 @@ const Dashboard = () => {
     //   toast.error("All fields are required!");
     //   return;
     // }
-  
+    console.log("🚀 Sending Patient Data:", newPatient);
     try {
       console.log("Adding patient:", newPatient);
 
@@ -220,7 +224,7 @@ const Dashboard = () => {
           withCredentials: true, 
         }
       );
-
+      console.log("✅ Patient Added Response:", response.data); // Debugging log
       if (response.data) {
         setPatients((prev) => [...prev, response.data.patient]); // Add to state
         toast.success("Patient added successfully!");
@@ -386,7 +390,7 @@ const Dashboard = () => {
   }
   
   setSelectedPayment(payment);
-    setIsModalOpen(true);
+  setIsModalOpen(true);
   };
   const handleSubmitPayment = async () => {
     try {
