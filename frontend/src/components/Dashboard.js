@@ -324,11 +324,12 @@ const Dashboard = () => {
     }
   };
   const handleCreatePayment = async () => {
-    if (!newPayment.name || !newPayment.amount ||  !newPayment.remarks ||(newPayment.status==="Completed"&&!newPayment.transactionId) ) {
+    if (!newPayment.name || !newPayment.amount ||  !newPayment.remarks ||(newPayment.paymentStatus==="Completed"&&!newPayment.transactionId) ) {
       toast.error("All fields are required!");
       return;
     }
     try {
+      console.log(newPayment)
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/finance/payments`,
         newPayment,
@@ -336,6 +337,7 @@ const Dashboard = () => {
       );
   
       if (response.data.payment) {
+        console.log(response.data)
         if (newPayment.paymentStatus === "Completed") {
           setPayments((prevPayments) => [...prevPayments, response.data.payment]);
         } else {
@@ -343,7 +345,7 @@ const Dashboard = () => {
         }
   
         toast.success("Payment added successfully!");
-        setNewPayment({ name: "", amount: "", type: "", transactionId: "", remarks: "", paymentStatus: "Pending" });
+        setNewPayment({ name: "", amount: "", type: "Credit Card", transactionId: "", remarks: "", paymentStatus: "Pending" });
         setActivePage(newPayment.paymentStatus === "Completed" ? "/payments" : "/pending-payments");
 
       } else {

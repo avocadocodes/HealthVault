@@ -28,9 +28,9 @@ const CreatePayment = ({ newPayment, setNewPayment, handleCreatePayment, theme }
         className={`p-3 ${theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-black"} rounded-md`}
       />
       <select
-        value={newPayment.status}
+        value={newPayment.paymentStatus}
         onChange={(e) => {
-          setNewPayment({ ...newPayment, status: e.target.value })
+          setNewPayment({ ...newPayment, paymentStatus: e.target.value })
           if(e.target.value==="Completed")setcompletePaymentOptions(true)
           else setcompletePaymentOptions(false)
         }}
