@@ -13,6 +13,7 @@ import { useTheme } from "../context/ThemeContext";
 import { FaMoon, FaSun, FaSignOutAlt, FaHome  , FaCalendarCheck, FaUser, FaMoneyBillWave } from "react-icons/fa";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
+import CompletePaymentModal from "./dynamic-pages/doctor/CompletePaymentModal";
 import DoctorDynamicPage from "./dynamic-pages/doctor/DoctorDynamicPage";
 const locales = {
   "en-US": require("date-fns/locale/en-US"),
@@ -65,17 +66,7 @@ const Dashboard = () => {
     setActiveMenu(activeMenu === menu ? null : menu);
   };
   const navigate = useNavigate();
-  // const { logout } = useAuth();
-  // function getCookie(name) {
-  //   const cookies = document.cookie.split("; ");
-  //   for (let cookie of cookies) {
-  //       const [key, value] = cookie.split("=");
-  //       if (key === name) {
-  //           return value;
-  //       }
-  //   }
-  //   return null; // Return null if cookie not found
-  // }
+
   const fetchDoctorDetails = async () => {
     try {
       // const token = Cookies.get("token"); 
@@ -93,21 +84,26 @@ const Dashboard = () => {
 
   const fetchAppointments = async () => {
     try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}/appointments`,
-        {
-          withCredentials: true,
+        const response = await axios.get(
+            `${process.env.REACT_APP_API_URL}/appointments`,
+            { withCredentials: true }
+        );
+        console.log("Fetched Appointments from API:", response.data); // ✅ Log API response
+
+        if (Array.isArray(response.data)) {
+            setAppointments(response.data);
+            console.log("Updated State - Appointments:", response.data); // ✅ Log state update
+        } else {
+            console.error("Appointments response is not an array!", response.data);
         }
-      );
-      console.log("Fetched Appointments:", response.data);
-      const filteredAppointments = response.data.filter(
-        (appointment) => appointment.status !== "completed"
-      );
-      setAppointments(filteredAppointments);
     } catch (err) {
-      console.error("Failed to fetch appointments:", err);
+        console.error("Failed to fetch appointments:", err);
     }
-  };  
+};
+
+
+
+  
   const handleAddAppointment = async () => {
     if (
       !newAppointment.patientName ||
@@ -207,10 +203,10 @@ const Dashboard = () => {
     }
   };
   const handleAddPatient = async () => {
-    if (!newPatient.name || !newPatient.age || !newPatient.gender) {
-      toast.error("All fields are required!");
-      return;
-    }
+    // if (!newPatient.name || !newPatient.age || !newPatient.gender) {
+    //   toast.error("All fields are required!");
+    //   return;
+    // }
   
     try {
       console.log("Adding patient:", newPatient);
@@ -234,7 +230,7 @@ const Dashboard = () => {
       console.error("Failed to add patient:", err);
       toast.error("Failed to add patient.");
     }
-};
+  };
 
   const fetchPatients = async () => {
     try {
@@ -255,6 +251,7 @@ const Dashboard = () => {
     }
   };
   const handleEditPatient = (patient) => {
+    console.log("Editing patient:", patient);
     setEditingPatient(patient); 
   };
   const handleUpdatePatient = async () => {
@@ -379,7 +376,14 @@ const Dashboard = () => {
     }
   };
   const handleCompletePayment = (payment) => {
-    setSelectedPayment(payment);
+      console.log("Opening modal for payment:", payment);
+  
+  if (!payment) {
+    console.error("handleCompletePayment: No payment selected!");
+    return;
+  }
+  
+  setSelectedPayment(payment);
     setIsModalOpen(true);
   };
   const handleSubmitPayment = async () => {
@@ -402,8 +406,6 @@ const Dashboard = () => {
   
   
   useEffect(() => {
-    // const token = Cookies.get("token");
-    // console.log(token)
     if (activePage === "/patient-list") {
       fetchPatients();
     }
@@ -514,8 +516,47 @@ const Dashboard = () => {
       />
       <Navbar />
       <div className="p-6 mt-16 flex-1 overflow-auto">
-        <DoctorDynamicPage activePage={activePage} />
-      </div>
+        <DoctorDynamicPage 
+          activePage={activePage}
+          bookingRequests={bookingRequests}
+          handleBookingAction={handleBookingAction}
+          newAppointment={newAppointment}
+          setNewAppointment={setNewAppointment}
+          handleAddAppointment={handleAddAppointment} 
+          appointments={appointments}
+          fetchAppointments={fetchAppointments}
+          patients={patients}
+          handleEditPatient={handleEditPatient}
+          handleDeletePatient={handleDeletePatient}
+          handleUpdatePatient={handleUpdatePatient}
+          editingPatient={editingPatient}
+          setEditingPatient={setEditingPatient}
+          handleAddPatient={handleAddPatient}
+          payments={payments}
+          // isModalOpen={isModalOpen} 
+          // setIsModalOpen={setIsModalOpen} 
+          // selectedPayment={selectedPayment} 
+          // paymentDetails={paymentDetails}
+          // setPaymentDetails={setPaymentDetails} 
+          // handleSubmitPayment={handleSubmitPayment}
+          pendingPayments={pendingPayments}
+          handleCompletePayment={handleCompletePayment}
+          newPayment={newPayment}
+          setNewPayment={setNewPayment}
+          handleCreatePayment={handleCreatePayment}
+          theme={theme} 
+        />
+      {isModalOpen && selectedPayment ? (
+        <CompletePaymentModal
+          isModalOpen={isModalOpen}
+          setIsModalOpen={setIsModalOpen}
+          selectedPayment={selectedPayment}
+          paymentDetails={paymentDetails}
+          setPaymentDetails={setPaymentDetails}
+          handleSubmitPayment={handleSubmitPayment}
+        />
+      ) : null}
+  </div>
       {/* Dynamic Page Content */}
       {/* <div className="p-6 mt-16 flex-1 overflow-auto">
         {activePage === "/booking-requests" && (

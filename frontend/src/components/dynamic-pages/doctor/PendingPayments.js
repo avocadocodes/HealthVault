@@ -21,7 +21,10 @@ const PendingPayments = ({ pendingPayments, handleCompletePayment, theme }) => (
               <td className="border p-2">{payment.remarks || "N/A"}</td>
               <td className="border p-2">
                 <button
-                  onClick={() => handleCompletePayment(payment)}
+                  onClick={() => {
+                    console.log("Clicked Complete for:", payment);
+                    handleCompletePayment(payment);
+                  }}
                   className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600"
                 >
                   Complete

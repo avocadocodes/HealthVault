@@ -1,9 +1,11 @@
 import React from "react";
 
-const Appointments = ({ appointments=[], handleDeleteAppointment, markAsVisited, theme }) => (
+const Appointments = ({ appointments=[], handleDeleteAppointment, markAsVisited, theme }) => {
+  console.log("Appointments received in Appointments.js:", appointments); 
+  return(
   <div>
     <h3 className="text-xl font-bold mb-4">Upcoming Appointments</h3>
-    {Array.isArray(appointments) && appointments.length > 0 ? (
+    {appointments && Array.isArray(appointments) && appointments.length > 0 ? (
     appointments.map((appointment) => (
 
         <div key={appointment._id} className={`${theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-black"} p-4 rounded-md mb-4`}>
@@ -23,6 +25,6 @@ const Appointments = ({ appointments=[], handleDeleteAppointment, markAsVisited,
       <p className="text-gray-400">No Appointments Scheduled.</p>
     )}
   </div>
-);
+)};
 
 export default Appointments;
